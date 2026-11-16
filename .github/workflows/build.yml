@@ -1,0 +1,87 @@
+
+name: Build World Soccer Era APK
+
+on:
+  push:
+    paths:
+      - 'world-soccer-era-github.zip'
+      - '.github/workflows/build.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  android:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract project
+        id: project
+        run: |
+          set -euo pipefail
+          unzip -q world-soccer-era-github.zip -d "$RUNNER_TEMP/project"
+          PROJECT_DIR="$(find "$RUNNER_TEMP/project" -name project.godot -printf '%h\n' | head -n 1)"
+          test -n "$PROJECT_DIR"
+          echo "dir=$PROJECT_DIR" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools build-tools;35.0.1 platforms;android-35'
+
+      - name: Install Godot
+        run: |
+          set -euo pipefail
+          BASE="https://github.com/godotengine/godot/releases/download/4.5.1-stable"
+          mkdir -p "$HOME/godot" "$HOME/.local/share/godot/export_templates"
+          curl -fsSL "$BASE/Godot_v4.5.1-stable_linux.x86_64.zip" -o "$RUNNER_TEMP/godot.zip"
+          unzip -q "$RUNNER_TEMP/godot.zip" -d "$HOME/godot"
+          curl -fsSL "$BASE/Godot_v4.5.1-stable_export_templates.tpz" -o "$RUNNER_TEMP/templates.tpz"
+          unzip -q "$RUNNER_TEMP/templates.tpz" -d "$RUNNER_TEMP/templates"
+          mv "$RUNNER_TEMP/templates/templates" "$HOME/.local/share/godot/export_templates/4.5.1.stable"
+          ln -sf "$HOME/godot/Godot_v4.5.1-stable_linux.x86_64" "$HOME/godot/godot"
+          chmod +x "$HOME/godot/godot"
+          echo "$HOME/godot" >> "$GITHUB_PATH"
+
+      - name: Configure debug keystore
+        run: |
+          keytool -genkey -v -keystore "$HOME/debug.keystore" -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 -storepass android -keypass android -dname 'CN=Android Debug,O=Android,C=US'
+          mkdir -p "$HOME/.config/godot"
+          cat > "$HOME/.config/godot/editor_settings-4.tres" <<EOF
+          [gd_resource type="EditorSettings" format=3]
+          [resource]
+          export/android/android_sdk_path = "$ANDROID_HOME"
+          export/android/java_sdk_path = "$JAVA_HOME"
+          export/android/debug_keystore = "$HOME/debug.keystore"
+          export/android/debug_keystore_user = "androiddebugkey"
+          export/android/debug_keystore_pass = "android"
+          EOF
+
+      - name: Import project
+        run: godot --headless --path "${{ steps.project.outputs.dir }}" --import || true
+
+      - name: Run tests
+        run: godot --headless --path "${{ steps.project.outputs.dir }}" res://tests/run_tests.tscn
+
+      - name: Export APK
+        run: |
+          set -euo pipefail
+          cd "${{ steps.project.outputs.dir }}"
+          mkdir -p build/android
+          godot --headless --path . --export-debug 'Android' build/android/world-soccer-era.apk
+          test -s build/android/world-soccer-era.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: world-soccer-era-apk
+          path: ${{ steps.project.outputs.dir }}/build/android/world-soccer-era.apk
+          if-no-files-found: error
+          retention-days: 30
+          
