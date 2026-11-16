@@ -34,7 +34,13 @@ jobs:
 
       - uses: android-actions/setup-android@v3
         with:
-          packages: 'platform-tools build-tools;35.0.1 platforms;android-35'
+          packages: |
+  platform-tools
+  build-tools;35.0.1
+  platforms;android-35
+  cmdline-tools;latest
+  cmake;3.10.2.4988404
+  ndk;28.1.13356709
 
       - name: Install Godot
         run: |
