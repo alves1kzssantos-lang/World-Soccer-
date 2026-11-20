@@ -2,7 +2,7 @@
 import { Game, Money, LocalSaveStore, FORMATIONS, TONES } from "../career";
 import type { Player, Club, MatchSim } from "../career";
 import { loadGameData, FetchDataSource } from "../data/db";
-import type { CareerApi, ClubVM, PlayerVM, MatchInfoVM, MatchResultVM, PackVM, PostVM, CupVM, TieVM, TableRowVM } from "./career_api";
+import type { BoxTierVM, CareerApi, ClubVM, PlayerVM, MatchInfoVM, MatchResultVM, PackVM, PostVM, CupVM, TieVM, TableRowVM } from "./career_api";
 
 const STAT_LABELS = ["Jogadas de ataque", "Chutes", "Posse de bola (%)", "Faltas", "Cartões amarelos", "Cartões vermelhos", "Impedimentos"];
 
@@ -101,18 +101,18 @@ export class RealCareer implements CareerApi {
   }
   proposeRenewal(id: number, wage: number, years: number, role: string) { const r = this.g.contracts.propose(id, wage, years, role); return { result: r.result, text: r.text }; }
   packs(): PackVM[] {
-    const feat = this.g.store.featured();
-    const tierOf = (id: string): PackVM["tier"] => (id.includes("jov") ? "jovem" : id.includes("lenda") ? "lenda" : id.includes("elite") ? "elite" : "ouro");
-    return this.g.store.packs().map((p) => ({ id: p.id, name: p.nome + (p.id === feat ? " • DESTAQUE" : ""), tier: tierOf(p.id),
-      desc: p.descricao, price: this.g.store.price(p.id), count: p.cartas, odds: this.g.store.odds(p.id).map((o) => [o.nome, Math.round(o.p > 1 ? o.p : o.p * 100)] as [string, number]) }));
+    const st = this.g.store;
+    return st.packs().map((p) => ({ id: p.id, name: p.nome, desc: p.descricao, price: st.price(p.id), count: p.cartas,
+      spinsLeft: st.spinsLeft(), spinsMax: st.spinsMax(),
+      tiers: st.odds(p.id).map((o) => { const t = st.tier(o.tier); return { id: t.id as BoxTierVM["id"], name: t.nome, ovr: t.ovr, pct: Math.round(o.p * 1000) / 10, color: "#" + t.cor }; }) }));
   }
   openPack(id: string) {
     const why = this.g.store.canBuy(id);
-    if (why) return { ok: false, msg: why, players: [], refund: 0 };
+    if (why) return { ok: false, msg: why, players: [], refund: 0, tiers: [] as BoxTierVM["id"][] };
     const r = this.g.store.buy(id);
     const players = r.cards.map((c, i) => (c.pid !== undefined && this.g.S.players[c.pid] ? this.p(this.g.S.players[c.pid]) :
       { id: 90000 + i, name: c.name, pos: c.pos, age: c.age, ovr: c.ovr, pot: c.ovr, nat: c.nat, num: 0, energy: 100, value: 0, wage: 0, contract: 0 }));
-    return { ok: r.ok, msg: r.text, players, refund: r.cards.reduce((t, c) => t + c.refund, 0) };
+    return { ok: r.ok, msg: r.text, players, refund: r.cards.reduce((t, c) => t + c.refund, 0), tiers: r.cards.map((c) => c.tier as BoxTierVM["id"]) };
   }
   finance() {
     const S = this.g.S, e = S.econ, bd = this.g.finance.breakdown();

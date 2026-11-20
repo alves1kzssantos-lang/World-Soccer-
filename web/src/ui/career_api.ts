@@ -11,7 +11,8 @@ export interface SlotVM { slot: number; empty: boolean; mode?: "tecnico" | "joga
 export interface MatchInfoVM { home: ClubVM; away: ClubVM; comp: string; compId: number; stage: string; date: string }
 export interface TableRowVM { pos: number; club: ClubVM; p: number; w: number; d: number; l: number; gf: number; ga: number; pts: number; me?: boolean }
 export interface PostVM { user: string; kind: "torcida" | "corneta" | "imprensa" | "rival" | "voce"; text: string; likes: number; when: string; verified?: boolean }
-export interface PackVM { id: string; name: string; tier: "ouro" | "elite" | "lenda" | "jovem"; desc: string; price: number; count: number; odds: [string, number][] }
+export interface BoxTierVM { id: "bronze" | "prata" | "ouro"; name: string; ovr: [number, number]; pct: number; color: string }
+export interface PackVM { id: string; name: string; desc: string; price: number; count: number; tiers: BoxTierVM[]; spinsLeft: number; spinsMax: number }
 export interface FinanceVM { cash: number; seasonResult: number; budget: number; spent: number; wageBill: number; wageCap: number; confidence: number;
   income: { label: string; value: number }[]; expense: { label: string; value: number }[]; history: number[]; tx: { day: string; label: string; value: number }[] }
 export interface QuestionVM { q: string; answers: Record<"humilde" | "confiante" | "provocar" | "desviar", string> }
@@ -41,7 +42,7 @@ export interface CareerApi {
   renewal(id: number): RenewalVM;
   proposeRenewal(id: number, wage: number, years: number, role: string): { result: "aceita" | "contraproposta" | "recusa"; text: string };
   packs(): PackVM[];
-  openPack(id: string): { ok: boolean; msg: string; players: PlayerVM[]; refund: number };
+  openPack(id: string): { ok: boolean; msg: string; players: PlayerVM[]; refund: number; tiers: BoxTierVM["id"][] };
   finance(): FinanceVM;
   table(): TableRowVM[];
   results(): { round: string; home: ClubVM; away: ClubVM; hg: number; ag: number }[];
@@ -139,24 +140,20 @@ export class MockCareer implements CareerApi {
     if (wage >= r.askWage * 0.85) return { result: "contraproposta", text: `${r.player.name} pede ${this.money(r.askWage * 0.95 / 1000)}/sem.` };
     return { result: "recusa", text: `${r.player.name} recusou a proposta.` };
   }
+  private spins = 3;
   packs(): PackVM[] {
-    return [
-      { id: "jovem", name: "Pack Jovem Promessa", tier: "jovem", desc: "Até 21 anos com potencial 80+", price: 4.5, count: 2, odds: [["Potencial 80–84", 70], ["Potencial 85–89", 25], ["Potencial 90+", 5]] },
-      { id: "ouro", name: "Pack Ouro 80+", tier: "ouro", desc: "1 jogador com geral 80 ou mais", price: 9.0, count: 1, odds: [["80–82", 72], ["83–85", 23], ["86+", 5]] },
-      { id: "elite", name: "Pack Elite 85+", tier: "elite", desc: "1 jogador com geral 85 ou mais", price: 22.0, count: 1, odds: [["85–86", 70], ["87–89", 26], ["90+", 4]] },
-      { id: "lenda", name: "Pack Lenda 90+", tier: "lenda", desc: "1 craque com geral 90 ou mais", price: 48.0, count: 1, odds: [["90–91", 80], ["92–93", 17], ["94+", 3]] },
-    ];
+    return [{ id: "box", name: "Box de Contratações", desc: "Gire e ganhe 1 jogador: Bronze, Prata ou Ouro.", price: 3.0, count: 1, spinsLeft: this.spins, spinsMax: 3,
+      tiers: [{ id: "bronze", name: "Bronze", ovr: [68, 74], pct: 65, color: "#b8734a" }, { id: "prata", name: "Prata", ovr: [75, 80], pct: 27, color: "#c9d1d9" },
+        { id: "ouro", name: "Ouro", ovr: [81, 90], pct: 8, color: "#e6c56a" }] }];
   }
-  openPack(id: string): { ok: boolean; msg: string; players: PlayerVM[]; refund: number } {
+  openPack(id: string): { ok: boolean; msg: string; players: PlayerVM[]; refund: number; tiers: BoxTierVM["id"][] } {
     const p = this.packs().find((x) => x.id === id)!;
-    if (this.cash < p.price) return { ok: false, msg: "Caixa insuficiente para este pack.", players: [], refund: 0 };
-    this.cash -= p.price;
-    const min = { jovem: 74, ouro: 80, elite: 85, lenda: 90 }[p.tier];
-    const got = Array.from({ length: p.count }, (_, i) => {
-      const b = this.mk[(Math.random() * this.mk.length) | 0];
-      return { ...b, id: 9000 + Math.floor(Math.random() * 9999), ovr: min + Math.floor(Math.random() * 4), age: p.tier === "jovem" ? 18 + i : b.age };
-    });
-    return { ok: true, msg: "", players: got, refund: 0 };
+    if (this.spins <= 0) return { ok: false, msg: "Seu time já usou os 3 giros.", players: [], refund: 0, tiers: [] };
+    if (this.cash < p.price) return { ok: false, msg: "Caixa insuficiente.", players: [], refund: 0, tiers: [] };
+    this.cash -= p.price; this.spins--;
+    const r = Math.random(); const t = r < 0.08 ? p.tiers[2] : r < 0.35 ? p.tiers[1] : p.tiers[0];
+    const b = this.mk[(Math.random() * this.mk.length) | 0];
+    return { ok: true, msg: "", players: [{ ...b, id: 9000 + Math.floor(Math.random() * 9999), ovr: t.ovr[0] + Math.floor(Math.random() * (t.ovr[1] - t.ovr[0] + 1)) }], refund: 0, tiers: [t.id] };
   }
   finance(): FinanceVM {
     return { cash: this.cash, seasonResult: 1.9, budget: 14.5, spent: 4.2, wageBill: 0.894, wageCap: 1.11, confidence: 82,

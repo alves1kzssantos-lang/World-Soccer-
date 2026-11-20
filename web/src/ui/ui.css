@@ -127,3 +127,23 @@
 .tie .w { font-weight: 700; color: var(--accent); }
 .post { display: flex; gap: 10px; padding: 8px; border-radius: 10px; background: var(--panel); margin-bottom: 6px; }
 .slot { display: flex; flex-direction: column; justify-content: space-between; min-height: 120px; }
+
+/* ---- Box de contratações (giro) ---- */
+.boxmain { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; padding: 16px 12px; }
+.box-art { width: 70%; aspect-ratio: 1; max-height: 30vh; border-radius: 18px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;
+  background: radial-gradient(circle at 30% 25%, #6dff73, #1c7d22 60%, #0c2b10); box-shadow: 0 0 28px rgba(57,227,63,.45); font: 700 2.4em Display; letter-spacing: .08em; color: #06140a; }
+.box-art::before { content: ""; position: absolute; inset: -40%; background: conic-gradient(from 0deg, transparent, rgba(255,255,255,.35), transparent 30%); animation: spin 3s linear infinite; }
+.box-art span { position: relative; }
+.spin-dot { width: 14px; height: 14px; border-radius: 50%; background: #2a2f2c; border: 2px solid #3a403c; }
+.spin-dot.on { background: #39e33f; border-color: #8cff90; box-shadow: 0 0 8px rgba(57,227,63,.7); }
+.boxtier { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; padding: 12px 8px; }
+.bt-art { width: 100%; aspect-ratio: 3/4; max-height: 26vh; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(160deg, color-mix(in srgb, var(--c) 85%, #fff), var(--c) 45%, color-mix(in srgb, var(--c) 45%, #000)); color: #111; font: 700 1.3em Display; letter-spacing: .06em; }
+.bt-ouro .bt-art, .reel-card.bt-ouro { box-shadow: 0 0 18px rgba(230,197,106,.7); }
+.reel-win { position: relative; width: min(92vw, 820px); height: 168px; overflow: hidden; border-radius: 14px; background: #0c0f0d; border: 2px solid #2b322e; }
+.reel-strip { position: absolute; left: 0; top: 12px; display: flex; gap: 10px; transition: transform 4.2s cubic-bezier(.12,.82,.18,1); will-change: transform; }
+.reel-card { width: 104px; height: 140px; flex: 0 0 104px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font: 700 1.05em Display; color: #111;
+  background: linear-gradient(160deg, color-mix(in srgb, var(--c) 85%, #fff), var(--c) 45%, color-mix(in srgb, var(--c) 45%, #000)); }
+.reel-card.win { outline: 4px solid #39e33f; transform: scale(1.06); transition: transform .3s; }
+.reel-mark { position: absolute; left: 50%; top: 0; bottom: 0; width: 4px; margin-left: -2px; background: #39e33f; box-shadow: 0 0 12px #39e33f; }
+.pcard .f[class*="bt-"] { background: linear-gradient(160deg, color-mix(in srgb, var(--c) 85%, #fff), var(--c) 50%, color-mix(in srgb, var(--c) 45%, #000)); color: #111; }

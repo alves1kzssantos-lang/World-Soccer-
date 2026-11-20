@@ -1,35 +1,65 @@
 {
-  "_sobre": "Loja de contratações: packs pagos com o CAIXA DO CLUBE. preco_base em $ mi para um clube de receita anual = receita_referencia; o preço real escala com a receita do seu clube (entre escala_min e escala_max). odds = chance de cada carta sair em cada nível (somam 1). Repetido (jogador que já é seu) vira reembolso.",
+  "_sobre": "Box de contratações: cada giro custa do CAIXA DO CLUBE e sorteia 1 carta. Três cartas: Bronze (a menos rara), Prata e Ouro (a mais rara). O preço escala com a receita do clube. Cada time tem giros_por_time giros (renovados a cada temporada se reinicia_temporada). Repetido vira reembolso.",
   "receita_referencia": 50.0,
   "escala_min": 0.3,
   "escala_max": 2.5,
-  "destaque_desconto": 0.2,
+  "destaque_desconto": 0.0,
   "reembolso_duplicado": 0.5,
   "anos_contrato": 3,
   "tolerancia_teto_folha": 1.12,
   "tiers": [
-    {"id": "bronze", "nome": "Bronze", "ovr": [62, 69], "cor": "b8734a"},
-    {"id": "prata", "nome": "Prata", "ovr": [70, 74], "cor": "c9d1d9"},
-    {"id": "ouro", "nome": "Ouro", "ovr": [75, 79], "cor": "e6c56a"},
-    {"id": "ouro80", "nome": "Ouro Raro 80+", "ovr": [80, 84], "cor": "f2b705"},
-    {"id": "elite", "nome": "Elite 85+", "ovr": [85, 89], "cor": "39e33f"},
-    {"id": "lenda", "nome": "Lenda 90+", "ovr": [90, 94], "cor": "b56cff"}
+    {
+      "id": "bronze",
+      "nome": "Bronze",
+      "ovr": [
+        68,
+        74
+      ],
+      "cor": "b8734a"
+    },
+    {
+      "id": "prata",
+      "nome": "Prata",
+      "ovr": [
+        75,
+        80
+      ],
+      "cor": "c9d1d9"
+    },
+    {
+      "id": "ouro",
+      "nome": "Ouro",
+      "ovr": [
+        81,
+        90
+      ],
+      "cor": "e6c56a"
+    }
   ],
   "packs": [
-    {"id": "jovem", "nome": "Pack Jovem Promessa", "descricao": "1 garoto de até 21 anos com potencial alto.", "preco_base": 1.2, "cartas": 1,
-      "idade_max": 21, "pot_min": 80, "cor": "2fbf71",
-      "odds": [{"tier": "bronze", "p": 0.55}, {"tier": "prata", "p": 0.33}, {"tier": "ouro", "p": 0.12}]},
-    {"id": "ouro", "nome": "Pack Ouro 80+", "descricao": "2 jogadores; garantia de nível Ouro, chance de 80+.", "preco_base": 4.0, "cartas": 2,
-      "cor": "e6c56a",
-      "odds": [{"tier": "ouro", "p": 0.78}, {"tier": "ouro80", "p": 0.2}, {"tier": "elite", "p": 0.02}]},
-    {"id": "elite", "nome": "Pack Elite 85+", "descricao": "1 jogador 80+; chance real de um 85+.", "preco_base": 9.0, "cartas": 1,
+    {
+      "id": "box",
+      "nome": "Box de Contratações",
+      "descricao": "Gire e ganhe 1 jogador: Bronze, Prata ou Ouro.",
+      "preco_base": 3.0,
+      "cartas": 1,
       "cor": "39e33f",
-      "odds": [{"tier": "ouro80", "p": 0.7}, {"tier": "elite", "p": 0.27}, {"tier": "lenda", "p": 0.03}]},
-    {"id": "lenda", "nome": "Pack Lenda 90+", "descricao": "1 jogador 85+ com chance de um 90+.", "preco_base": 22.0, "cartas": 1,
-      "cor": "b56cff",
-      "odds": [{"tier": "elite", "p": 0.8}, {"tier": "lenda", "p": 0.2}]},
-    {"id": "elenco", "nome": "Pack Reforço de Elenco", "descricao": "3 jogadores para completar o grupo.", "preco_base": 2.0, "cartas": 3,
-      "cor": "8aa0b4",
-      "odds": [{"tier": "bronze", "p": 0.45}, {"tier": "prata", "p": 0.4}, {"tier": "ouro", "p": 0.15}]}
-  ]
+      "odds": [
+        {
+          "tier": "bronze",
+          "p": 0.65
+        },
+        {
+          "tier": "prata",
+          "p": 0.27
+        },
+        {
+          "tier": "ouro",
+          "p": 0.08
+        }
+      ]
+    }
+  ],
+  "giros_por_time": 3,
+  "reinicia_temporada": true
 }
