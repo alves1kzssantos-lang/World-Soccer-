@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <AssemblyName>UnityEngine.UI</AssemblyName>
+    <Nullable>disable</Nullable>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <LangVersion>9.0</LangVersion>
+    <NoWarn>CS0618;CS0649;CS0414;CS0169;CS0108;CS0114;CS0067</NoWarn>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <DefineConstants>PACKAGE_PHYSICS;PACKAGE_PHYSICS2D;PACKAGE_ANIMATION;PACKAGE_TILEMAP;UNITY_2021_3_OR_NEWER</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="/root/tools/ugui2018/UnityEngine.UI/**/*.cs" Exclude="/root/tools/ugui2018/UnityEngine.UI/**/Properties/**" />
+    <PackageReference Include="UnityEngine.Modules" Version="2021.3.33" />
+  </ItemGroup>
+</Project>

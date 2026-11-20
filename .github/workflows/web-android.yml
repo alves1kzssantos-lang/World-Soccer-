@@ -1,0 +1,74 @@
+name: Web + APK (World Soccer)
+
+on:
+  push:
+    paths:
+      - 'web/**'
+      - '.github/workflows/web-android.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - run: npm test --if-present
+      - run: npm run build
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools platforms;android-34 build-tools;34.0.0'
+      - name: Android project (Capacitor)
+        run: |
+          npx cap add android
+          npx cap sync android
+          # app em paisagem e tela cheia
+          sed -i 's|<activity|<activity android:screenOrientation="sensorLandscape"|' android/app/src/main/AndroidManifest.xml
+      - name: App icon
+        run: |
+          for d in mdpi hdpi xhdpi xxhdpi xxxhdpi; do
+            cp public/art/icon_192.png android/app/src/main/res/mipmap-$d/ic_launcher.png
+            cp public/art/icon_192.png android/app/src/main/res/mipmap-$d/ic_launcher_round.png
+          done
+          rm -f android/app/src/main/res/mipmap-anydpi-v26/ic_launcher*.xml
+      - name: Build APK
+        working-directory: web/android
+        run: ./gradlew assembleDebug --no-daemon
+      - uses: actions/upload-artifact@v4
+        with:
+          name: world-soccer-apk
+          path: web/android/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+          retention-days: 30
+      - uses: actions/upload-artifact@v4
+        with:
+          name: world-soccer-web
+          path: web/dist
+          retention-days: 30
+      - name: Publish APK to branch apk-builds
+        working-directory: .
+        run: |
+          set -e
+          mkdir -p /tmp/apkpub && cp web/android/app/build/outputs/apk/debug/*.apk /tmp/apkpub/world-soccer.apk
+          cd /tmp/apkpub
+          git init -q -b apk-builds
+          git config user.email "actions@github.com"; git config user.name "github-actions"
+          echo "APK gerado de ${GITHUB_SHA}" > LEIAME.txt
+          git add -A && git commit -qm "APK de ${GITHUB_SHA::7}"
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${GITHUB_REPOSITORY}.git" apk-builds

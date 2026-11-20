@@ -1,0 +1,448 @@
+{
+ "_doc": "Coletiva pós-jogo e redes sociais do técnico. {t} = técnico/jogador, {c} = seu clube, {r} = adversário, {p} = destaque, {fase} = fase da copa, {pos} = posição na tabela, {placar} = placar. Tons: humilde, confiante, provocar, desviar. Efeitos (pontos de 0 a 100): diretoria, torcida, moral, imprensa; seguidores = multiplicador de ganho.",
+ "tons": {
+  "humilde": {
+   "rotulo": "Humilde",
+   "cor": "green",
+   "efeitos": {
+    "diretoria": 2,
+    "torcida": 1,
+    "moral": 2,
+    "imprensa": 3,
+    "seguidores": 0.6
+   }
+  },
+  "confiante": {
+   "rotulo": "Confiante",
+   "cor": "blue",
+   "efeitos": {
+    "diretoria": 1,
+    "torcida": 3,
+    "moral": 3,
+    "imprensa": 0,
+    "seguidores": 1.0
+   }
+  },
+  "provocar": {
+   "rotulo": "Provocar",
+   "cor": "red",
+   "efeitos": {
+    "diretoria": -3,
+    "torcida": 2,
+    "moral": 1,
+    "imprensa": -4,
+    "seguidores": 2.4
+   }
+  },
+  "desviar": {
+   "rotulo": "Desconversar",
+   "cor": "dark",
+   "efeitos": {
+    "diretoria": 0,
+    "torcida": -1,
+    "moral": 0,
+    "imprensa": -2,
+    "seguidores": 0.3
+   }
+  }
+ },
+ "_doc_derrota": "Depois de derrota, o tom pesa diferente (somado aos efeitos acima).",
+ "derrota_ajuste": {
+  "humilde": {
+   "torcida": 1,
+   "diretoria": 1
+  },
+  "confiante": {
+   "torcida": -4,
+   "imprensa": -1
+  },
+  "provocar": {
+   "torcida": -5,
+   "diretoria": -3
+  },
+  "desviar": {
+   "torcida": -1
+  }
+ },
+ "perguntas": {
+  "vitoria": [
+   {
+    "texto": "Vitória sobre o {r} por {placar}. O que decidiu o jogo hoje?",
+    "respostas": {
+     "humilde": "O grupo trabalhou muito a semana inteira. Mérito dos jogadores, eu só organizo.",
+     "confiante": "Fizemos exatamente o que planejamos. Esse time sabe o que quer.",
+     "provocar": "Decidiu que a gente é melhor. Simples assim, o {r} não viu a cor da bola.",
+     "desviar": "Agora é descansar e pensar no próximo compromisso."
+    }
+   },
+   {
+    "texto": "Três pontos importantes. Dá para sonhar mais alto nesta temporada?",
+    "respostas": {
+     "humilde": "Pé no chão. Um jogo de cada vez, sem criar euforia.",
+     "confiante": "Dá. Esse elenco tem condição de brigar lá em cima.",
+     "provocar": "Quem não sonha alto é quem está atrás da gente na tabela.",
+     "desviar": "Sonho é com a torcida. Aqui dentro é trabalho."
+    }
+   }
+  ],
+  "goleada": [
+   {
+    "texto": "Goleada de {placar}! Foi a melhor atuação da equipe até aqui?",
+    "respostas": {
+     "humilde": "Foi uma noite feliz, mas o adversário teve problemas também. Respeito total.",
+     "confiante": "Foi o retrato do que treinamos. E ainda dá para jogar mais.",
+     "provocar": "Podia ter sido mais. Tiramos o pé no fim por educação.",
+     "desviar": "Placar é passado. Amanhã tem treino."
+    }
+   }
+  ],
+  "empate": [
+   {
+    "texto": "Empate com o {r}. Faltou o quê para vencer?",
+    "respostas": {
+     "humilde": "Faltou capricho no último passe. A responsabilidade é minha, vamos corrigir.",
+     "confiante": "Fomos superiores. Com a mesma postura, as vitórias vêm.",
+     "provocar": "Faltou o {r} querer jogar. Eles vieram só para se defender.",
+     "desviar": "Vou rever o jogo com calma antes de falar qualquer coisa."
+    }
+   },
+   {
+    "texto": "A torcida esperava mais em casa. Ficou um gosto amargo?",
+    "respostas": {
+     "humilde": "Entendo a cobrança. A torcida tem razão de querer mais.",
+     "confiante": "Gosto amargo seria perder. O time competiu e vai crescer.",
+     "provocar": "Quem estava no estádio viu um time que não desistiu. O resto é barulho.",
+     "desviar": "O campeonato é longo, um ponto pode fazer diferença lá na frente."
+    }
+   }
+  ],
+  "derrota": [
+   {
+    "texto": "Derrota por {placar} para o {r}. Qual a explicação?",
+    "respostas": {
+     "humilde": "Erramos e eu sou o primeiro responsável. Peço desculpas à torcida.",
+     "confiante": "Um tropeço não muda o caminho. Na próxima a resposta vem em campo.",
+     "provocar": "O {r} teve sorte e a arbitragem ajudou. Não foi futebol que decidiu.",
+     "desviar": "Não é o momento de apontar culpados. Vamos trabalhar."
+    }
+   },
+   {
+    "texto": "O seu cargo está ameaçado depois de hoje?",
+    "respostas": {
+     "humilde": "Meu cargo é da diretoria. Eu sigo trabalhando enquanto tiver confiança.",
+     "confiante": "Não. Tenho convicção no trabalho e o elenco está comigo.",
+     "provocar": "Ameaçado está quem escreve isso sem ver um treino.",
+     "desviar": "Essa pergunta não é para mim."
+    }
+   }
+  ],
+  "derrota_pesada": [
+   {
+    "texto": "Uma derrota pesada, {placar}. O time desistiu em campo?",
+    "respostas": {
+     "humilde": "Foi um dia muito ruim. Não tem desculpa. Vamos devolver com trabalho.",
+     "confiante": "Ninguém desistiu. Foi um acidente e vamos reagir rápido.",
+     "provocar": "Desistir? Tem gente aqui que nunca jogou bola querendo dar lição.",
+     "desviar": "Vou conversar com o grupo primeiro, depois falo."
+    }
+   }
+  ],
+  "destaque": [
+   {
+    "texto": "{p} foi o grande nome da partida. Como você avalia?",
+    "respostas": {
+     "humilde": "O {p} é dedicado, mas sem o coletivo ninguém brilha sozinho.",
+     "confiante": "{p} está no nível de seleção. É questão de tempo.",
+     "provocar": "Tem clube grande de olho, mas o {p} fica. Podem tirar o cavalinho da chuva.",
+     "desviar": "Prefiro não individualizar. O time todo foi bem."
+    }
+   }
+  ],
+  "arbitragem": [
+   {
+    "texto": "Foram {cartoes} cartões hoje. A arbitragem atrapalhou?",
+    "respostas": {
+     "humilde": "A arbitragem tem um trabalho difícil. Precisamos ter mais controle emocional.",
+     "confiante": "Fomos firmes, mas leais. Os cartões não mudam o que o time é.",
+     "provocar": "Tem lances que precisam ser explicados. Quero ver o critério nos próximos jogos.",
+     "desviar": "Não falo de arbitragem."
+    }
+   }
+  ],
+  "confronto_direto": [
+   {
+    "texto": "O {r} está colado na tabela. Esse jogo valia mais que três pontos?",
+    "respostas": {
+     "humilde": "Todo confronto direto é difícil. Respeitamos muito o {r}.",
+     "confiante": "Valia, e mostramos quem quer ficar na frente.",
+     "provocar": "Agora o {r} vai ter que olhar a tabela de baixo para cima.",
+     "desviar": "Tabela a gente olha no fim. Ainda tem muito jogo."
+    }
+   }
+  ],
+  "topo": [
+   {
+    "texto": "O {c} está em {pos}º lugar. Já dá para falar em título?",
+    "respostas": {
+     "humilde": "Ainda não. Falta muito e qualquer descuido custa caro.",
+     "confiante": "Estamos preparados para brigar por tudo.",
+     "provocar": "Os outros que se preocupem. A gente está tranquilo.",
+     "desviar": "Título se fala com a taça na mão."
+    }
+   }
+  ],
+  "rebaixamento": [
+   {
+    "texto": "O time está em {pos}º, na zona de perigo. Há risco real de queda?",
+    "respostas": {
+     "humilde": "O momento é delicado e eu sei disso. Vamos sair juntos.",
+     "confiante": "Esse elenco é bom demais para cair. Vamos subir na tabela.",
+     "provocar": "Quem está torcendo pela nossa queda vai se decepcionar.",
+     "desviar": "Não vou fazer contas agora."
+    }
+   }
+  ],
+  "copa": [
+   {
+    "texto": "Resultado na {fase} da {copa}. Como fica o confronto?",
+    "respostas": {
+     "humilde": "Copa é detalhe. Precisamos respeitar o adversário até o fim.",
+     "confiante": "Estamos fortes para seguir avançando.",
+     "provocar": "Copa é para time grande, e a gente sabe disso.",
+     "desviar": "Agora o foco é a recuperação física."
+    }
+   }
+  ],
+  "pro_nota_boa": [
+   {
+    "texto": "{t}, você foi um dos melhores em campo. O que sentiu hoje?",
+    "respostas": {
+     "humilde": "Feliz por ajudar. Os companheiros facilitaram meu trabalho.",
+     "confiante": "Estou num grande momento e quero mais.",
+     "provocar": "Quem duvidava de mim pode começar a pedir desculpas.",
+     "desviar": "O importante é o resultado do time."
+    }
+   }
+  ],
+  "pro_nota_ruim": [
+   {
+    "texto": "{t}, não foi seu melhor jogo. O que aconteceu?",
+    "respostas": {
+     "humilde": "Não fui bem e assumo. Vou trabalhar dobrado.",
+     "confiante": "Dia ruim todo mundo tem. Semana que vem eu respondo.",
+     "provocar": "Fácil criticar de fora. Quero ver aguentar a pressão aqui dentro.",
+     "desviar": "Vou conversar com o professor, não tenho muito a dizer."
+    }
+   }
+  ],
+  "pro_gol": [
+   {
+    "texto": "{t}, você deixou o seu. Para quem vai o gol?",
+    "respostas": {
+     "humilde": "Para a minha família e para quem me ajudou a chegar aqui.",
+     "confiante": "Para a torcida. E vem mais por aí.",
+     "provocar": "Para quem me criticou na semana passada.",
+     "desviar": "Gol é do time todo."
+    }
+   }
+  ],
+  "pro_banco": [
+   {
+    "texto": "{t}, você jogou pouco hoje. Está chateado com o técnico?",
+    "respostas": {
+     "humilde": "Respeito a decisão. Vou treinar para ganhar meu espaço.",
+     "confiante": "Quando eu entrar, vou mostrar que mereço jogar sempre.",
+     "provocar": "Cada um sabe o que faz. Os números estão aí.",
+     "desviar": "Não tenho nada a declarar sobre isso."
+    }
+   }
+  ],
+  "pro_regular": [
+   {
+    "texto": "{t}, uma atuação correta hoje. Dá para render mais?",
+    "respostas": {
+     "humilde": "Sempre dá. Vou ouvir o professor e evoluir no detalhe.",
+     "confiante": "Dá, e vai acontecer. Estou ganhando ritmo a cada jogo.",
+     "provocar": "Correta? Fiz o que o time precisava, quem entende de bola viu.",
+     "desviar": "Nota é com vocês. Eu me preocupo com o grupo."
+    }
+   },
+   {
+    "texto": "{t}, como você avalia o seu jogo contra o {r}?",
+    "respostas": {
+     "humilde": "Fiz minha parte, mas posso ajudar mais na marcação.",
+     "confiante": "Bom jogo. Estou cada vez mais adaptado ao time.",
+     "provocar": "Joguei bem, só não vê quem não quer.",
+     "desviar": "Prefiro falar do coletivo."
+    }
+   }
+  ]
+ },
+ "social": {
+  "torcedores": [
+   "torcida_do_{c}",
+   "{c}_de_coracao",
+   "arquibancada_{c}",
+   "fiel_desde_crianca",
+   "geral_cantando",
+   "camisa12_{c}",
+   "vovo_torcedora",
+   "{c}_noticias_fa",
+   "sofredor_raiz",
+   "bandeirao_{c}",
+   "tio_do_radinho",
+   "menina_da_arquibancada"
+  ],
+  "haters": [
+   "corneteiro_oficial",
+   "nao_aguento_mais_{c}",
+   "tatico_de_sofa",
+   "analista_de_padaria",
+   "chorao_da_geral",
+   "fora_tudo_{c}",
+   "pessimista_fc",
+   "reclamao_99"
+  ],
+  "jornalistas": [
+   "PortalDaBola",
+   "ResenhaFC",
+   "BolaNaRede",
+   "ApitoFinal",
+   "CanalDoTorcedor",
+   "MesaRedondaJá",
+   "SetoristaDaBola"
+  ],
+  "rivais": [
+   "{r}_zoeiro",
+   "torcida_do_{r}",
+   "{r}_memes",
+   "secador_profissional",
+   "{r}_ate_morrer"
+  ],
+  "fa_vitoria": [
+   "Que time! {placar} e o {c} mandou no jogo",
+   "Professor {t}, você é diferente! Que vitória",
+   "Isso aqui é {c}! Orgulho dessa equipe",
+   "Torcida faz a festa, {c} deu show",
+   "Vitória com cara de time campeão",
+   "O {t} arrumou esse time, não tem jeito"
+  ],
+  "fa_empate": [
+   "Ponto fora não é ruim, mas dava pra mais",
+   "Faltou um pouco de coragem no fim",
+   "Empate amargo, mas o time lutou",
+   "Sigo confiando no trabalho do {t}"
+  ],
+  "fa_derrota": [
+   "Dia ruim, mas sigo com o {c} até o fim",
+   "Cabeça erguida, campeonato é longo",
+   "Perdemos, mas a torcida não abandona",
+   "Hora de reagir, {c}!"
+  ],
+  "hater_derrota": [
+   "Escalação sem pé nem cabeça hoje, {t}",
+   "{placar}? Não dá pra aceitar isso",
+   "Esse esquema já deu, troca isso aí",
+   "Time sem alma, sem ideia e sem resultado",
+   "{t}, cadê o plano B?",
+   "Mais uma noite pra esquecer"
+  ],
+  "hater_sequencia": [
+   "Já são {n} jogos sem vencer. Alguém explica?",
+   "A diretoria vai esperar o quê para mudar?",
+   "#{tag} subindo e eu entendo o motivo",
+   "{n} tropeços seguidos. Não tem desculpa"
+  ],
+  "hater_geral": [
+   "Ganhou, mas jogou mal. Não me engana",
+   "Sorte de campeonato não dura pra sempre",
+   "Vitória magra contra time pequeno, nada demais"
+  ],
+  "jornalista_vitoria": [
+   "{c} vence o {r} por {placar} e ganha confiança",
+   "Com boa atuação, {c} supera o {r}",
+   "{t} acerta na estratégia e {c} comemora"
+  ],
+  "jornalista_empate": [
+   "{c} e {r} ficam no {placar}",
+   "Empate com sabor de pouco para o {c}"
+  ],
+  "jornalista_derrota": [
+   "{c} perde para o {r} e liga o alerta",
+   "Pressão aumenta sobre {t} após derrota por {placar}",
+   "Atuação apagada custa caro ao {c}"
+  ],
+  "rival_zoeira": [
+   "Hahaha, {placar}! Vai {c}, só que não",
+   "Obrigado pelos três pontos, {c}",
+   "Teve torcedor do {c} saindo no intervalo, é verdade?",
+   "Sentiram o peso da camisa, né?"
+  ],
+  "rival_choro": [
+   "Ganharam com ajuda, todo mundo viu",
+   "Juiz caseiro hoje, hein",
+   "Vitória de sorte, aproveitem enquanto dura"
+  ],
+  "reacao": {
+   "humilde": [
+    "Gostei da postura do {t} na coletiva. Humildade é tudo",
+    "Respeito demais esse discurso do professor",
+    "{t} assumiu a responsabilidade. Isso é ser líder"
+   ],
+   "confiante": [
+    "Esse {t} fala com convicção, eu compro a ideia",
+    "Gostei da confiança. Agora é mostrar em campo",
+    "O professor tá confiante e eu também"
+   ],
+   "provocar": [
+    "O {t} jogou gasolina na fogueira, agora aguenta",
+    "Que coletiva! O {r} vai ficar irritado",
+    "Polêmico, mas falou o que a torcida queria ouvir",
+    "Essa fala vai dar o que falar a semana inteira"
+   ],
+   "desviar": [
+    "Coletiva sem resposta nenhuma de novo",
+    "Falou, falou e não disse nada",
+    "O {t} fugiu das perguntas hoje"
+   ],
+   "pulou": [
+    "{t} não foi à coletiva hoje. Estranho",
+    "Sem entrevista do técnico depois do jogo"
+   ]
+  },
+  "contratacao": [
+   "Chegou reforço! Bem-vindo, {p}",
+   "{p} no {c}, gostei da contratação",
+   "Será que o {p} resolve? Vamos ver"
+  ],
+  "venda": [
+   "Vendeu o {p}?! Diretoria, explica isso",
+   "Perder o {p} dói, mas o caixa agradece",
+   "Boa sorte, {p}. Obrigado por tudo"
+  ],
+  "sequencia_vitorias": [
+   "{n} vitórias seguidas! Esse time embalou",
+   "Ninguém segura o {c} em {n} jogos"
+  ],
+  "tags_boas": [
+   "{c}Embalado",
+   "FicaProfessor",
+   "{c}NoTopo",
+   "NoiteDeFesta",
+   "ConfiaNo{t}"
+  ],
+  "tags_ruins": [
+   "Fora{t}",
+   "CriseNo{c}",
+   "{c}SemRumo",
+   "AcordaElenco",
+   "CadêOPlanoB"
+  ],
+  "tags_coletiva": {
+   "provocar": "Coletiva{t}",
+   "humilde": "LiderançaDo{t}",
+   "confiante": "{t}Confiante",
+   "desviar": "SilêncioNoVestiário"
+  }
+ }
+}

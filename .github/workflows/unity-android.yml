@@ -1,0 +1,52 @@
+name: Unity Android APK
+
+on:
+  push:
+    paths:
+      - 'unity/WorldSoccer/**'
+      - '.github/workflows/unity-android.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android/sdk/ndk /opt/ghc /usr/local/share/boost || true
+          df -h /
+
+      - uses: actions/cache@v4
+        with:
+          path: unity/WorldSoccer/Library
+          key: Library-Android-${{ hashFiles('unity/WorldSoccer/Assets/**', 'unity/WorldSoccer/Packages/**', 'unity/WorldSoccer/ProjectSettings/**') }}
+          restore-keys: Library-Android-
+
+      - name: Build APK (GameCI)
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          projectPath: unity/WorldSoccer
+          targetPlatform: Android
+          buildMethod: WorldSoccer.EditorTools.BuildScript.BuildAndroid
+          customParameters: -logFile -
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: world-soccer-unity-apk
+          path: |
+            unity/WorldSoccer/Builds/Android/*.apk
+            build/**/*.apk
+          if-no-files-found: error
+          retention-days: 30

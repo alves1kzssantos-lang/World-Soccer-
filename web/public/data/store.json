@@ -1,0 +1,65 @@
+{
+  "_sobre": "Box de contratações: cada giro custa do CAIXA DO CLUBE e sorteia 1 carta. Três cartas: Bronze (a menos rara), Prata e Ouro (a mais rara). O preço escala com a receita do clube. Cada time tem giros_por_time giros (renovados a cada temporada se reinicia_temporada). Repetido vira reembolso.",
+  "receita_referencia": 50.0,
+  "escala_min": 0.3,
+  "escala_max": 2.5,
+  "destaque_desconto": 0.0,
+  "reembolso_duplicado": 0.5,
+  "anos_contrato": 3,
+  "tolerancia_teto_folha": 1.12,
+  "tiers": [
+    {
+      "id": "bronze",
+      "nome": "Bronze",
+      "ovr": [
+        68,
+        74
+      ],
+      "cor": "b8734a"
+    },
+    {
+      "id": "prata",
+      "nome": "Prata",
+      "ovr": [
+        75,
+        80
+      ],
+      "cor": "c9d1d9"
+    },
+    {
+      "id": "ouro",
+      "nome": "Ouro",
+      "ovr": [
+        81,
+        90
+      ],
+      "cor": "e6c56a"
+    }
+  ],
+  "packs": [
+    {
+      "id": "box",
+      "nome": "Box de Contratações",
+      "descricao": "Gire e ganhe 1 jogador: Bronze, Prata ou Ouro.",
+      "preco_base": 3.0,
+      "cartas": 1,
+      "cor": "39e33f",
+      "odds": [
+        {
+          "tier": "bronze",
+          "p": 0.65
+        },
+        {
+          "tier": "prata",
+          "p": 0.27
+        },
+        {
+          "tier": "ouro",
+          "p": 0.08
+        }
+      ]
+    }
+  ],
+  "giros_por_time": 3,
+  "reinicia_temporada": true
+}

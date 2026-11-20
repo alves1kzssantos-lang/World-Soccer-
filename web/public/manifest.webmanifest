@@ -1,0 +1,13 @@
+{
+  "name": "World Soccer: A Nova Era",
+  "short_name": "World Soccer",
+  "start_url": "./",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#0b0d0c",
+  "theme_color": "#0b0d0c",
+  "icons": [
+    { "src": "art/icon_192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "art/icon_512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

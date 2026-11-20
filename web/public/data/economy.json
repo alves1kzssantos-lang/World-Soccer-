@@ -1,0 +1,19 @@
+{
+	"_sobre": "Economia do clube (src/finance.gd). Caixa e taxas em milhões; salários em mil por semana.",
+	"folha_a": 0.113,
+	"folha_b": 2.65,
+	"receita_sobre_folha": 1.12,
+	"parte_tv": 0.38,
+	"parte_patrocinio": 0.3,
+	"parte_bilheteria": 0.32,
+	"staff_sobre_folha": 0.12,
+	"estadio_base": 12000,
+	"estadio_por_ponto": 1600,
+	"caixa_inicial_semestres": 0.5,
+	"orcamento_do_caixa": 0.55,
+	"teto_folha_sobre_esperada": 1.1,
+	"divida_maxima_sobre_receita": 0.45,
+	"juros_semana": 0.0035,
+	"venda_para_orcamento": 0.5,
+	"caixa_inicial_por_ponto": 1.2
+}

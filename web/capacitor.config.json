@@ -1,0 +1,6 @@
+{
+  "appId": "com.alves.worldsoccerera",
+  "appName": "World Soccer: A Nova Era",
+  "webDir": "dist",
+  "android": { "backgroundColor": "#0b0d0c" }
+}
