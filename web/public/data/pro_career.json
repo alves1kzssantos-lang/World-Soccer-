@@ -1,0 +1,148 @@
+{
+  "_doc": "Modo carreira de jogador — todos os números ficam aqui. Explicação em design/gdd/carreira-jogador.md",
+  "criacao": {
+    "ovr_por_idade": {
+      "16": 52,
+      "17": 54,
+      "18": 56,
+      "19": 58
+    },
+    "pot_min": 76,
+    "pot_max": 92
+  },
+  "peneira": {
+    "olheiros": 6,
+    "nota_minima_base": 5.6,
+    "nota_por_ponto_de_forca": 0.075,
+    "forca_referencia": 60
+  },
+  "nota": {
+    "base": 6.2,
+    "por_ponto_ovr": 0.04,
+    "ruido": 0.45,
+    "gol": 1.1,
+    "assistencia": 0.7,
+    "chute_no_gol": 0.15,
+    "perdeu_bola": -0.25,
+    "impedido": -0.15,
+    "chute_fora": -0.05,
+    "vitoria": 0.35,
+    "derrota": -0.35,
+    "sem_sofrer_gols_defensor": 0.4,
+    "gol_sofrido_defensor": -0.15,
+    "amarelo": -0.3,
+    "vermelho": -1.5,
+    "min": 3.0,
+    "max": 10.0
+  },
+  "envolvimento_no_lance": {
+    "AC": 0.75,
+    "PD": 0.65,
+    "PE": 0.65,
+    "MEI": 0.6,
+    "VOL": 0.4,
+    "LD": 0.35,
+    "LE": 0.35,
+    "ZAG": 0.25,
+    "GOL": 0.0
+  },
+  "treino": {
+    "leve": {
+      "xp": 2.5,
+      "lesao": 0.6,
+      "energia": 6
+    },
+    "normal": {
+      "xp": 3.5,
+      "lesao": 1.0,
+      "energia": 0
+    },
+    "intenso": {
+      "xp": 5,
+      "lesao": 1.7,
+      "energia": -6
+    },
+    "xp_por_nota": 2.0,
+    "xp_custo_base": 25,
+    "xp_custo_por_ovr": 2.2,
+    "idade_crescimento_lento": 30
+  },
+  "lesao": {
+    "chance_por_jogo": 0.025,
+    "jogos_min": 1,
+    "jogos_max": 6
+  },
+  "fama": {
+    "nota_boa": 7.5,
+    "nota_ruim": 5.8,
+    "ganho_nota_boa": 0.9,
+    "perda_nota_ruim": -0.7,
+    "gol": 0.3,
+    "titulo": 4.0,
+    "convocacao": 1.5,
+    "premio": 6.0,
+    "seguidores_por_fama": 40000,
+    "queda_anual": 0.12
+  },
+  "tecnico": {
+    "confianca_inicial": 50,
+    "por_ponto_de_nota": 4.0,
+    "bonus_escalacao_por_ponto": 0.08,
+    "entra_do_banco_chance": 0.55
+  },
+  "selecao": {
+    "ovr_minimo": 74,
+    "nota_media_minima": 6.8,
+    "ovr_garantido": 80,
+    "rodadas": [
+      8,
+      16,
+      24,
+      32
+    ]
+  },
+  "janela": {
+    "rodada_meio": 0.5,
+    "propostas_sem_empresario": 1,
+    "propostas_por_nivel_empresario": 1
+  },
+  "redes": {
+    "respostas": {
+      "humilde": {
+        "fama": 0.1,
+        "torcida": 1,
+        "tecnico": 0,
+        "seguidores": 0.002,
+        "multa": 0.0,
+        "patrocinio": 0.0
+      },
+      "provocar": {
+        "fama": 0.3,
+        "torcida": -2,
+        "tecnico": -1,
+        "seguidores": 0.02,
+        "multa": 0.08,
+        "patrocinio": 0.05
+      },
+      "xingar": {
+        "fama": -4.0,
+        "torcida": -6,
+        "tecnico": -5,
+        "seguidores": 0.03,
+        "multa": 0.35,
+        "patrocinio": 0.3
+      },
+      "ignorar": {
+        "fama": 0.0,
+        "torcida": 0,
+        "tecnico": 0,
+        "seguidores": 0.0,
+        "multa": 0.0,
+        "patrocinio": 0.0
+      }
+    },
+    "multa_salarios_semanas": 3,
+    "polemicas_para_afastamento": 3,
+    "jogos_afastado": 2
+  }
+}
