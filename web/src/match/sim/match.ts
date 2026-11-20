@@ -382,7 +382,7 @@ export class Match {
     if (this.script.chanceAt) {
       if (!this.chance && this.pendingChance[h.team] !== null && (dGoal < 50 || this.pendingT[h.team] > 4)) this.startChance(h.team);
     } else {
-      const zone = T.chanceZone + Math.min(this.sinceChance[h.team] * 0.8, 22);
+      const zone = T.chanceZone + Math.min(Math.max(this.sinceChance[h.team] - 20, 0) * 0.8, 15);
       if (!this.chance && dGoal < zone && this.chanceCd[h.team] <= 0) this.startChance(h.team);
     }
     if (this.mode !== "live") return;
