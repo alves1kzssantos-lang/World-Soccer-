@@ -1,0 +1,131 @@
+{
+  "_doc": "Vida fora de campo: compras, empresários e patrocinadores (marcas fictícias). Valores em milhões.",
+  "compras": [
+    {
+      "id": "moto",
+      "nome": "Moto",
+      "preco": 0.02,
+      "fama": 0.2,
+      "torcida": 0
+    },
+    {
+      "id": "carro",
+      "nome": "Carro popular",
+      "preco": 0.04,
+      "fama": 0.3,
+      "torcida": 0
+    },
+    {
+      "id": "casa_mae",
+      "nome": "Casa para a família",
+      "preco": 0.25,
+      "fama": 1.0,
+      "torcida": 3
+    },
+    {
+      "id": "relogio",
+      "nome": "Relógio de luxo",
+      "preco": 0.15,
+      "fama": 0.8,
+      "torcida": -1
+    },
+    {
+      "id": "esportivo",
+      "nome": "Carro esportivo",
+      "preco": 0.4,
+      "fama": 1.0,
+      "torcida": -1
+    },
+    {
+      "id": "apto",
+      "nome": "Apartamento de frente pro mar",
+      "preco": 1.5,
+      "fama": 1.0,
+      "torcida": 0
+    },
+    {
+      "id": "projeto",
+      "nome": "Projeto social na sua comunidade",
+      "preco": 0.4,
+      "fama": 3.0,
+      "torcida": 8
+    },
+    {
+      "id": "mansao",
+      "nome": "Mansão",
+      "preco": 8.0,
+      "fama": 2.0,
+      "torcida": -2
+    },
+    {
+      "id": "jatinho",
+      "nome": "Jatinho particular",
+      "preco": 35.0,
+      "fama": 3.0,
+      "torcida": -3
+    },
+    {
+      "id": "instituto",
+      "nome": "Instituto com seu nome",
+      "preco": 6.0,
+      "fama": 5.0,
+      "torcida": 12
+    }
+  ],
+  "empresarios": [
+    {
+      "id": "ze",
+      "nome": "Zé da Várzea",
+      "nivel": 1,
+      "comissao": 0.03,
+      "fama_minima": 0,
+      "aumento_salario": 0.0,
+      "texto": "Amigo da família, conhece uns clubes pequenos."
+    },
+    {
+      "id": "lima",
+      "nome": "Marcos Lima Sports",
+      "nivel": 2,
+      "comissao": 0.08,
+      "fama_minima": 15,
+      "aumento_salario": 0.12,
+      "texto": "Agência nacional, leva jogador para a Série A."
+    },
+    {
+      "id": "global",
+      "nome": "Global Stars Agency",
+      "nivel": 3,
+      "comissao": 0.12,
+      "fama_minima": 40,
+      "aumento_salario": 0.25,
+      "texto": "Superagente com contatos na Europa."
+    }
+  ],
+  "patrocinadores": [
+    {
+      "marca": "Chuteiras Raio",
+      "fama_minima": 10,
+      "semanal": 0.003
+    },
+    {
+      "marca": "Energético Turbo",
+      "fama_minima": 25,
+      "semanal": 0.01
+    },
+    {
+      "marca": "Rede de Lanches Golaço",
+      "fama_minima": 45,
+      "semanal": 0.025
+    },
+    {
+      "marca": "Relógios Prime",
+      "fama_minima": 65,
+      "semanal": 0.06
+    },
+    {
+      "marca": "Montadora Veloz",
+      "fama_minima": 85,
+      "semanal": 0.15
+    }
+  ]
+}
