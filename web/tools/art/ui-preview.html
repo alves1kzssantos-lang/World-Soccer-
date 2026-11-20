@@ -1,0 +1,9 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Prévia da interface</title><style>html,body{margin:0;background:#0b0d0c}</style></head>
+<body><script type="module">
+import { startUI } from "/src/ui/app.ts";
+const q = new URLSearchParams(location.search);
+window.__ui = await startUI({ base: "/", start: q.get("s") || "title" });
+window.__ready = true;
+</script></body></html>
