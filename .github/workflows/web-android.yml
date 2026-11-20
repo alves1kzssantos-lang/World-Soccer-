@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -61,3 +61,14 @@ jobs:
           name: world-soccer-web
           path: web/dist
           retention-days: 30
+      - name: Publish APK to branch apk-builds
+        working-directory: .
+        run: |
+          set -e
+          mkdir -p /tmp/apkpub && cp web/android/app/build/outputs/apk/debug/*.apk /tmp/apkpub/world-soccer.apk
+          cd /tmp/apkpub
+          git init -q -b apk-builds
+          git config user.email "actions@github.com"; git config user.name "github-actions"
+          echo "APK gerado de ${GITHUB_SHA}" > LEIAME.txt
+          git add -A && git commit -qm "APK de ${GITHUB_SHA::7}"
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${GITHUB_REPOSITORY}.git" apk-builds
