@@ -1,0 +1,48 @@
+{
+	"_sobre": "Regras da carreira de técnico: renovação de contratos, empréstimos e banco de reservas. Valores em milhões ($ mi) e salários em mil por semana ($ k).",
+	"contrato": {
+		"anos_pedidos_ate_27": 4,
+		"anos_pedidos_28_31": 3,
+		"anos_pedidos_32_mais": 1,
+		"ajuste_salario_jovem": 1.08,
+		"ajuste_salario_veterano": 0.9,
+		"ajuste_craque_acima_do_clube": 0.12,
+		"ajuste_moral_por_ponto": 0.003,
+		"ajuste_idolo": 0.9,
+		"exigencia_reserva": 1.15,
+		"exigencia_rodizio": 1.05,
+		"aceita_a_partir": 0.98,
+		"contraproposta_a_partir": 0.85,
+		"penalidade_por_ano_de_diferenca": 0.04,
+		"tentativas_maximas": 3,
+		"desconto_contraproposta": 0.03,
+		"multa_rescisao_fracao": 0.5,
+		"ia_renova_chance_titular": 0.85,
+		"ia_renova_chance_reserva": 0.45,
+		"elenco_minimo": 16,
+		"aviso_rodadas": [0, 10, 20, 30]
+	},
+	"emprestimo": {
+		"pedido_chance_por_rodada": 0.06,
+		"idade_maxima_pedido": 23,
+		"minutos_maximos_pedido": 450,
+		"fracao_salario_ia_paga_min": 50,
+		"fracao_salario_ia_paga_max": 100,
+		"taxa_emprestimo_fracao_valor": 0.04,
+		"opcao_compra_fracao_valor": 1.1,
+		"ia_exerce_opcao_chance": 0.35,
+		"ia_entre_si_chance_por_rodada": 0.15,
+		"elenco_minimo_cedente": 20,
+		"aceita_ceder_minimo_pct": 50,
+		"evolucao_extra_minutos": 1200,
+		"oferecer_chance_base": 0.7
+	},
+	"banco": {
+		"reservas_max": 9,
+		"substituicoes_max": 5,
+		"paradas_max": 3,
+		"ia_minutos": [58, 68, 78],
+		"ia_energia_troca": 58,
+		"cansaco_por_minuto": 0.32
+	}
+}
