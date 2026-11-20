@@ -11,7 +11,7 @@ mkdirSync(OUT, { recursive: true });
 const server = spawn("npx", ["vite", "preview", "--port", "4179", "--strictPort"], { stdio: "pipe" });
 await new Promise((r) => setTimeout(r, 2500));
 
-const browser = await chromium.launch({ args: ["--enable-gpu-rasterization", "--ignore-gpu-blocklist"] });
+const browser = await chromium.launch();
 const results = [];
 for (const vp of [{ name: "1280x576", width: 1280, height: 576, dpr: 1 }, { name: "celular_915x412", width: 915, height: 412, dpr: 2.625 }]) {
   const page = await browser.newPage({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: vp.dpr, hasTouch: true });
@@ -55,3 +55,4 @@ for (const vp of [{ name: "1280x576", width: 1280, height: 576, dpr: 1 }, { name
 await browser.close();
 server.kill();
 console.log(JSON.stringify(results, null, 1));
+process.exit(0);

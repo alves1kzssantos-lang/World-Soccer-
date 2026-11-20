@@ -3,7 +3,7 @@ import { Rng } from "./rng";
 import { T } from "./tuning";
 import {
   BOX_DEPTH, BOX_HALF, CROSSBAR, DefaultScript, FORMATIONS, GOAL_HALF, L, PEN_SPOT, W,
-  type MatchEvents, type MatchScript, type PlayerInfo, type Pos, type ScriptKind, type TeamInfo,
+  type LiveResult, type LiveScript, type MatchEvents, type PlayerInfo, type Pos, type ScriptKind, type TeamInfo,
 } from "./types";
 
 export type Mode = "live" | "slowmo" | "decide" | "restart" | "goal" | "ended";
@@ -40,6 +40,7 @@ interface Chance {
   side: number;
   kind: ScriptKind | null; // null = chance do usuário (resolve na física)
   t: number;
+  ref?: unknown; // chance da carreira (para registrar o resultado)
 }
 
 const dirOf = (t: number): number => (t === 0 ? -1 : 1); // time 0 ataca para y = 0
@@ -48,7 +49,7 @@ const ownGoalY = (t: number): number => (t === 0 ? L : 0);
 
 export interface MatchOptions {
   seed?: number;
-  script?: MatchScript;
+  script?: LiveScript;
   events?: MatchEvents;
   userSide?: number; // -1 = ninguém (máquina x máquina)
   controlledId?: number; // carreira de jogador: só decide quando a bola está com ele
@@ -58,7 +59,12 @@ export interface MatchOptions {
 /** Partida contínua: simulação a 60 Hz com chances que congelam para o usuário decidir. */
 export class Match {
   readonly rng: Rng;
-  readonly script: MatchScript;
+  readonly script: LiveScript;
+  /** Chance da carreira esperando a posse do time (0 e 1). */
+  pendingChance: [unknown, unknown] = [null, null];
+  private pendingT: [number, number] = [0, 0];
+  private lastPasser: Player | null = null;
+  private chanceResult: LiveResult | null = null;
   readonly events: MatchEvents;
   readonly players: Player[] = [];
   readonly team: Player[][] = [[], []];
@@ -182,10 +188,13 @@ export class Match {
     for (let i = 0; i < 2; i++) {
       this.chanceCd[i] = Math.max(this.chanceCd[i] - dt, 0);
       if (this.mode === "live") this.sinceChance[i] += dt;
+      if (this.pendingChance[i] !== null) this.pendingT[i] += dt;
     }
     if (this.minute !== this.lastMinute) {
       this.lastMinute = this.minute;
       this.updateStamina();
+      const c = this.script.chanceAt?.(this.minute);
+      if (c) { this.pendingChance[c.side] = c.ref; this.pendingT[c.side] = 0; }
     }
     for (const p of this.players) {
       if (p.stun > 0) p.stun -= dt;
@@ -227,7 +236,7 @@ export class Match {
 
   private updateStamina(): void {
     for (const p of this.players) {
-      const f = this.script.staminaFactor?.(p.team, p.idx, this.minute) ?? 1;
+      const f = this.script.staminaFactor?.(p.info.id) ?? 1;
       p.stamina = f;
       p.body.maxSpeed = (T.speedBase + p.info.vel * T.speedPerPoint) * f;
     }
@@ -370,8 +379,12 @@ export class Match {
     // chance: perto do gol rival
     const dGoal = Math.abs(body.y - gy);
     // quanto mais tempo sem chance, mais longe do gol ela pode começar (o jogo não fica travado no meio)
-    const zone = T.chanceZone + Math.min(this.sinceChance[h.team] * 0.8, 22);
-    if (!this.chance && dGoal < zone && this.chanceCd[h.team] <= 0) this.startChance(h.team);
+    if (this.script.chanceAt) {
+      if (!this.chance && this.pendingChance[h.team] !== null && (dGoal < 50 || this.pendingT[h.team] > 4)) this.startChance(h.team);
+    } else {
+      const zone = T.chanceZone + Math.min(this.sinceChance[h.team] * 0.8, 22);
+      if (!this.chance && dGoal < zone && this.chanceCd[h.team] <= 0) this.startChance(h.team);
+    }
     if (this.mode !== "live") return;
     if (this.isUserControlled(h)) {
       if (this.chance && this.chance.side === h.team && this.userDribble <= 0) this.enterDecision();
@@ -432,6 +445,7 @@ export class Match {
           d.stun = 0.6; continue;
         } else { d.stun = 0.7; continue; }
       }
+      if (this.pendingChance[d.team] !== null && this.pendingT[d.team] > 3) { pWin = 1; pFoul = 0; }
       if (this.rng.chance(pFoul) && !(ch && ch.kind === "lost")) { this.foul(d, h, false); return; }
       if (this.rng.chance(clamp(pWin, 0.08, 1))) {
         d.anim = "slide"; d.animT = 0;
@@ -529,6 +543,7 @@ export class Match {
     this.passTarget = to;
     this.holder = null;
     this.lastTouch = from;
+    this.lastPasser = from;
     from.kick = 0.3; from.anim = "kick"; from.animT = 0;
     for (const o of this.team[1 - from.team]) o.tried = false;
     if (this.mode !== "live") this.goLive();
@@ -581,6 +596,7 @@ export class Match {
     if (dr < 1.0 && b.z < 2.0) {
       if (this.passOffside) {
         this.say("IMPEDIMENTO!");
+        this.result("offside", r, false);
         const x = r.body.x, y = r.body.y;
         const defTeam = 1 - r.team;
         this.endChance();
@@ -639,7 +655,10 @@ export class Match {
   private startChance(side: number): void {
     const user = side === this.userSide;
     this.sinceChance[side] = 0;
-    this.chance = { side, kind: user ? null : this.script.chanceOutcome(side, this.minute, this.rng), t: 0 };
+    const ref = this.pendingChance[side] ?? undefined;
+    this.pendingChance[side] = null;
+    this.chanceResult = null;
+    this.chance = { side, kind: user ? null : this.script.outcome(side, this.minute, this.rng, ref), t: 0, ref };
     if (!user && this.chance.kind === "penalty") {
       // vai para dentro da área procurar o contato
       const h = this.holder;
@@ -649,6 +668,11 @@ export class Match {
 
   endChance(): void {
     if (!this.chance) return;
+    if (this.chance.ref !== undefined && this.script.resolve) {
+      const r = this.chanceResult ?? { goal: false, kind: "lost", pid: this.lastTouch?.info.id ?? 0 };
+      this.script.resolve(this.chance.ref, r);
+    }
+    this.chanceResult = null;
     this.chanceCd[this.chance.side] = T.chanceCooldown;
     this.chance = null;
     this.penaltyMode = false;
@@ -802,6 +826,7 @@ export class Match {
           if (!this.rng.chance(0.45)) continue;
           b.vx = this.rng.range(-5, 5); b.vy = -b.vy * 0.3; b.vz = 2; b.cx = 0;
           this.text(`Travado por ${d.info.name}!`);
+          this.result("lost", sh, false);
           this.afterShot();
           this.ballState = "loose";
           return;
@@ -827,6 +852,7 @@ export class Match {
         if (b.speed() < 22 && b.z < 1.8 && this.rng.chance(0.6)) {
           k.anim = "catch"; k.animT = 0;
           this.text(`Defesa de ${k.info.name}!`);
+          this.result("save", sh, false);
           this.afterShot();
           b.place(k.body.x, k.body.y);
           this.holder = k; this.lastTouch = k; this.ballState = "held";
@@ -834,6 +860,7 @@ export class Match {
           return;
         }
         this.text(`${k.info.name} espalma!`);
+        this.result("save", sh, false);
         b.vx = this.rng.range(-8, 8); b.vy = -b.vy * 0.35; b.vz = 2.5; b.cx = 0;
         this.lastTouch = k;
         this.afterShot();
@@ -847,12 +874,14 @@ export class Match {
       if (ax < GOAL_HALF - 0.11 && b.z < CROSSBAR - 0.11) { this.goal(sh); return; }
       if (ax < GOAL_HALF + 0.12 && b.z < CROSSBAR + 0.12) {
         this.text(ax > GOAL_HALF - 0.11 ? "Na trave!" : "No travessão!");
+        this.result("out", sh, false);
         b.vy = -b.vy * 0.5; b.vx *= 0.5; b.y = gy - dirOf(sh.team) * 0.2;
         this.afterShot();
         this.ballState = "loose";
         return;
       }
       this.text(b.z >= CROSSBAR ? "Por cima do gol!" : "Pra fora!");
+      this.result("out", sh, false);
       this.afterShot();
       this.resetKeeper(k);
       const def = 1 - sh.team;
@@ -1043,6 +1072,7 @@ export class Match {
     this.score[sh.team] += 1;
     this.events.onGoal?.(sh.team, sh.info.name, this.minute);
     this.say(this.penaltyMode ? "GOOOL DE PÊNALTI!" : "GOOOL!");
+    this.result("goal", sh, true);
     this.afterShot();
     this.ball.vx *= 0.15; this.ball.vy *= 0.15; this.ball.vz = 0; this.ball.cx = 0;
     this.mode = "goal"; this.modeT = 0;
@@ -1090,6 +1120,16 @@ export class Match {
       b.frozen = false;
       this.kickoff(1 - sh.team);
     }
+  }
+
+  /** Guarda o resultado do lance para a carreira (registrado ao fechar a chance). */
+  private result(kind: string, p: Player, goal: boolean): void {
+    const lp = this.lastPasser;
+    this.chanceResult = {
+      goal, kind, pid: p.info.id,
+      apid: goal && lp && lp !== p && lp.team === p.team && !this.penaltyMode ? lp.info.id : undefined,
+      pen: this.penaltyMode,
+    };
   }
 
   // ------------------------------------------------------------ textos

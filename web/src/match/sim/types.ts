@@ -38,23 +38,31 @@ export interface TeamInfo {
   strength: number;
 }
 
-/** Desfecho de uma chance da máquina (o roteiro vem da simulação da carreira). */
+/** Desfecho de uma chance da máquina (mesmos nomes do ScriptOutcome da carreira). */
 export type ScriptKind = "goal" | "save" | "out" | "lost" | "offside" | "penalty";
 
+/** Resultado de um lance jogado em campo (mesmo formato do LanceResult da carreira). */
+export interface LiveResult { goal: boolean; kind: string; pid: number; apid?: number; pen?: boolean }
+
 /**
- * Roteiro da partida: a carreira implementa para que o resultado ao vivo bata com a simulação.
- * chanceOutcome: chamado quando o time da máquina chega perto do gol.
- * staminaFactor: 1 = descansado, ~0.84 = esgotado (multiplica velocidade e precisão).
+ * Roteiro que a partida ao vivo consulta. Não é um segundo MatchScript: é o adaptador interno
+ * (ver match/career_adapter.ts, que liga o MatchScript da carreira a isto).
+ * chanceAt: chamado a cada minuto; devolve o lado que ganhou uma chance agora (sem chanceAt, a
+ *   partida abre chances sozinha quando o time chega perto do gol).
+ * outcome: desfecho de um lance da máquina. resolve: o que aconteceu em campo num lance.
+ * staminaFactor: 1 = descansado, ~0.84 = esgotado.
  */
-export interface MatchScript {
-  chanceOutcome(side: number, minute: number, rng: Rng): ScriptKind;
-  staminaFactor?(side: number, idx: number, minute: number): number;
+export interface LiveScript {
+  chanceAt?(minute: number): { side: number; ref: unknown } | null;
+  outcome(side: number, minute: number, rng: Rng, ref?: unknown): ScriptKind;
+  resolve?(ref: unknown, result: LiveResult): void;
+  staminaFactor?(pid: number): number;
 }
 
 /** Roteiro padrão para jogar sem carreira: chances viram gol conforme a força dos times. */
-export class DefaultScript implements MatchScript {
+export class DefaultScript implements LiveScript {
   constructor(private strength: [number, number]) {}
-  chanceOutcome(side: number, _minute: number, rng: Rng): ScriptKind {
+  outcome(side: number, _minute: number, rng: Rng): ScriptKind {
     const diff = (this.strength[side] - this.strength[1 - side]) / 100;
     const r = rng.next();
     const pGoal = 0.27 + diff;
