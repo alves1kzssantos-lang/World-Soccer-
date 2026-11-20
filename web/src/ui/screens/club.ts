@@ -141,7 +141,7 @@ export function registerClub(ctx: Ctx): void {
     const fin = api.finance();
     const cash = h("div.card", { style: "padding:6px 12px;font:700 1.15em Display" }, M(fin.cash));
     const packEl = (p: PackVM) => h("div.card.pack", null,
-      h(`div.art.tier-${p.tier}`, null, h("span", { style: "position:relative" }, p.tier === "jovem" ? "★" : p.name.match(/\d+\+/)?.[0] ?? "")),
+      h(`div.art.tier-${p.tier}`, null, h("span", { style: "position:relative" }, p.tier === "jovem" ? "★" : p.name.match(/\d+\+/)?.[0] ?? `×${p.count}`)),
       h("div", { style: "font:700 1.1em Display" }, p.name), h("div.small.muted", null, p.desc),
       h("div.small", null, p.odds.map(([k, v]) => `${k}: ${v}%`).join(" • ")),
       button(M(p.price), () => openPack(p), "primary", { style: "width:100%" }));

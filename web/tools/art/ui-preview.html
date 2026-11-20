@@ -4,6 +4,6 @@
 <body><script type="module">
 import { startUI } from "/src/ui/app.ts";
 const q = new URLSearchParams(location.search);
-window.__ui = await startUI({ base: "/", start: q.get("s") || "title" });
+window.__ui = await startUI({ base: "/", start: q.get("s") || "title", mock: q.has("mock") });
 window.__ready = true;
 </script></body></html>

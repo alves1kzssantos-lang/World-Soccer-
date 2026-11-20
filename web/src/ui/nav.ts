@@ -73,7 +73,7 @@ export class Nav {
 /** Cabeçalho padrão das telas. */
 export function header(nav: Nav, title: string, sub = "", right?: HTMLElement | null, left?: HTMLElement | null): HTMLElement {
   return h("div.ws-head", null,
-    nav.depth > 0 ? h("button.btn.ghost", { onclick: () => nav.back(), style: "min-width:44px;padding:0 10px", "aria-label": "Voltar" }, "‹") : null,
+    nav.depth > 1 ? h("button.btn.ghost", { onclick: () => nav.back(), style: "min-width:44px;padding:0 10px", "aria-label": "Voltar" }, "‹") : null,
     left ?? null,
     h("div.grow", null, h("div.t", null, title), sub ? h("div.s", null, sub) : null),
     right ?? null);

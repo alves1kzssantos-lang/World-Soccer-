@@ -7,12 +7,13 @@ import { loadAtlas } from "./assets";
 import { loadThemes } from "./theme";
 import { setOverlayRoot } from "./widgets";
 import { MockCareer, type CareerApi } from "./career_api";
+import { createRealCareer } from "./real_career";
 import type { Ctx, MatchMount } from "./ctx";
 import { registerMenu } from "./screens/menu";
 import { registerClub } from "./screens/club";
 import { registerComp } from "./screens/comp";
 
-export interface UiOptions { api?: CareerApi; base?: string; mountMatch?: MatchMount; start?: string; warmup?: (p: (k: number, msg?: string) => void) => Promise<void> }
+export interface UiOptions { api?: CareerApi; mock?: boolean; base?: string; mountMatch?: MatchMount; start?: string; warmup?: (p: (k: number, msg?: string) => void) => Promise<void> }
 
 export async function startUI(opts: UiOptions = {}): Promise<{ nav: Nav; ctx: Ctx }> {
   const base = opts.base ?? "./";
@@ -29,9 +30,14 @@ export async function startUI(opts: UiOptions = {}): Promise<{ nav: Nav; ctx: Ct
   ld.progress(0.3, "Carregando escudos e logos…");
   await loadAtlas(base);
   await document.fonts?.ready;
-  if (opts.warmup) await opts.warmup((k, m) => ld.progress(0.35 + k * 0.6, m));
+  let api = opts.api;
+  if (!api && !opts.mock) {
+    ld.progress(0.45, "Montando os elencos reais…");
+    try { api = await createRealCareer(base); } catch (e) { console.warn("carreira real indisponível, usando exemplo", e); }
+  }
+  if (opts.warmup) await opts.warmup((k, m) => ld.progress(0.6 + k * 0.35, m));
   const nav = new Nav(stack);
-  const ctx: Ctx = { nav, api: opts.api ?? new MockCareer(), base, mountMatch: opts.mountMatch };
+  const ctx: Ctx = { nav, api: api ?? new MockCareer(), base, mountMatch: opts.mountMatch };
   registerMenu(ctx);
   registerClub(ctx);
   registerComp(ctx);

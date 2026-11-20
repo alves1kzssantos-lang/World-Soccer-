@@ -54,6 +54,7 @@ export function registerComp(ctx: Ctx): void {
       host.replaceChildren(
         h("div.row", null, cups.length > 1 ? tabs(cups.map((x) => x.name), ci, (i) => { ci = i; paint(); }) : null),
         h("div.row", null, compLogo(c.compId, 44), h("div", { style: "font:700 1.5em Display" }, c.name), c.champion ? chip(`Campeão: ${c.champion.name}`, "", "#" + th.accent) : null),
+        !c.rounds.some((r) => r.ties.length) ? h("div.card.muted", null, "O sorteio desta copa ainda não foi feito. Os confrontos aparecem aqui na primeira fase.") :
         h("div.scroll.grow", { style: "overflow-x:auto" }, h("div.bracket", null, c.rounds.map((r) => h("div.rnd", null, h("div.small.neon", { style: "font-weight:700" }, r.name.toUpperCase()),
           r.ties.length ? r.ties.map((t) => h("div.tie", null,
             h("div.row", { style: "gap:6px" }, clubCrest(t.a, 20), h("span.grow", { class: t.winner === 0 ? "w" : "" }, t.a.name), h("b.num", null, t.sa)),

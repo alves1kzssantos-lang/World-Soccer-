@@ -20,7 +20,7 @@ export function lookForPlayer(p: { id: number; pos?: string; num?: number | stri
   const id = p.id | 0;
   return { skin: p.look_skin ?? (id * 3) % SKINS.length, hcolor: p.look_hcolor ?? (id * 5) % HAIRS.length, hstyle: p.look_hstyle ?? id % 6,
     beard: p.look_beard ?? id % 4 === 1, c1: kit?.[0], c2: kit?.[1], striped: !!kit?.[2], keeper: p.pos === "GOL",
-    num: p.num !== undefined ? String(p.num) : "", expr: "smile" };
+    num: p.num ? String(p.num) : "", expr: "smile" };
 }
 
 /** Visual fixo a partir de um texto (usuários da rede social, repórter). */
