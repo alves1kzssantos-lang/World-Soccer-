@@ -143,7 +143,7 @@ export function registerClub(ctx: Ctx): void {
     const packEl = (p: PackVM) => h("div.card.pack", null,
       h(`div.art.tier-${p.tier}`, null, h("span", { style: "position:relative" }, p.tier === "jovem" ? "★" : p.name.match(/\d+\+/)?.[0] ?? `×${p.count}`)),
       h("div", { style: "font:700 1.1em Display" }, p.name), h("div.small.muted", null, p.desc),
-      h("div.small", null, p.odds.map(([k, v]) => `${k}: ${v}%`).join(" • ")),
+      h("div.small", null, p.odds.map(([k, v]) => `${k}: ${Math.round(Number(v) * 10) / 10}%`).join(" • ")),
       button(M(p.price), () => openPack(p), "primary", { style: "width:100%" }));
     const openPack = (p: PackVM) => {
       if (fin.cash < p.price) { toast("Caixa insuficiente para este pack."); return; }
