@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Compila os scripts do jogo contra as bibliotecas de referência da Unity 2021.3,
+       para achar erros sem o editor. Uso: dotnet build unity/tools/compile-check/Game.csproj -->
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <AssemblyName>WorldSoccer.Game</AssemblyName>
+    <Nullable>disable</Nullable>
+    <LangVersion>9.0</LangVersion>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <DefineConstants>UNITY_2021_3_OR_NEWER;UNITY_ANDROID</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../WorldSoccer/Assets/Scripts/**/*.cs" />
+    <PackageReference Include="UnityEngine.Modules" Version="2021.3.33" />
+    <ProjectReference Include="ugui/ugui.csproj" />
+  </ItemGroup>
+</Project>

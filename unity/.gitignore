@@ -1,0 +1,11 @@
+WorldSoccer/[Ll]ibrary/
+WorldSoccer/[Tt]emp/
+WorldSoccer/[Oo]bj/
+WorldSoccer/[Bb]uild/
+WorldSoccer/[Bb]uilds/
+WorldSoccer/[Ll]ogs/
+WorldSoccer/[Uu]ser[Ss]ettings/
+WorldSoccer/*.csproj
+WorldSoccer/*.sln
+tools/compile-check/**/bin/
+tools/compile-check/**/obj/
