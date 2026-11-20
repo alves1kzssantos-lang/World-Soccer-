@@ -74,7 +74,10 @@ export function mountLiveMatch(el: HTMLElement, info: MatchInfo, onEnd: (r: { hg
 export function runMatch(el: HTMLElement, match: Match, onEnd: () => void, onFrame?: () => void): () => void {
   const canvas = document.createElement("canvas");
   canvas.style.cssText = "position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none";
-  el.style.position = el.style.position || "relative";
+  // respeita o posicionamento da interface; se a área vier solta, ocupa a tela inteira
+  const pos = getComputedStyle(el).position;
+  if (pos === "static") el.style.position = "relative";
+  if (pos !== "absolute" && pos !== "fixed" && el.getBoundingClientRect().height < 10) el.style.cssText += ";position:absolute;inset:0";
   el.appendChild(canvas);
   const ctx = canvas.getContext("2d", { alpha: false })!;
   const renderer = new Renderer(ctx, match);
@@ -94,7 +97,6 @@ export function runMatch(el: HTMLElement, match: Match, onEnd: () => void, onFra
   addEventListener("resize", resize);
   resize();
   let raf = 0, last = performance.now(), alive = true;
-  const perf = window.__perf;
   const frame = (now: number): void => {
     if (!alive) return;
     const dt = Math.min((now - last) / 1000, 0.1);
@@ -102,6 +104,7 @@ export function runMatch(el: HTMLElement, match: Match, onEnd: () => void, onFra
     match.update(dt);
     onFrame?.();
     renderer.render(dt, dpr);
+    const perf = window.__perf;
     if (perf) { perf.frames++; perf.sumMs += dt * 1000; perf.worstMs = Math.max(perf.worstMs, dt * 1000); perf.drawMs += renderer.frameMs; }
     if (match.mode === "ended") { endT += dt; if (endT > 3) finish(); }
     raf = requestAnimationFrame(frame);

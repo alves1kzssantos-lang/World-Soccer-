@@ -380,7 +380,9 @@ export class Match {
     const dGoal = Math.abs(body.y - gy);
     // quanto mais tempo sem chance, mais longe do gol ela pode começar (o jogo não fica travado no meio)
     if (this.script.chanceAt) {
-      if (!this.chance && this.pendingChance[h.team] !== null && (dGoal < 50 || this.pendingT[h.team] > 4)) this.startChance(h.team);
+      // a chance do usuário só congela já no campo de ataque; a da máquina pode começar antes
+      const ready = h.team === this.userSide ? dGoal < 45 : dGoal < 50 || this.pendingT[h.team] > 4;
+      if (!this.chance && this.pendingChance[h.team] !== null && ready) this.startChance(h.team);
     } else {
       const zone = T.chanceZone + Math.min(Math.max(this.sinceChance[h.team] - 20, 0) * 0.8, 15);
       if (!this.chance && dGoal < zone && this.chanceCd[h.team] <= 0) this.startChance(h.team);
@@ -791,6 +793,7 @@ export class Match {
     if (this.penaltyMode) { plan.react = 0; plan.speed = 8; plan.x = W / 2 + [-2.8, 0, 2.8][this.rng.int(0, 2)]; }
     if (scripted === "goal") { plan.save = 0; plan.speed = 1.5; plan.react = 0.35; plan.x = W / 2 - (aimX - W / 2) * 0.6; }
     if (scripted === "save") { plan.save = 1; plan.speed = 12; plan.react = 0.04; }
+    if (scripted === "out") { plan.save = 0; plan.speed = 2; plan.react = 0.3; }
     k.diveDir = Math.sign(plan.x - k.body.x);
     for (const o of this.team[1 - h.team]) o.tried = false;
     if (this.mode !== "live") this.goLive();

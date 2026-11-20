@@ -1,6 +1,6 @@
 import type { Match, Player } from "../sim/match";
 import { BOX_DEPTH, BOX_HALF, CROSSBAR, GOAL_HALF, L, PEN_SPOT, W } from "../sim/types";
-import { drawFigure, makeKit, type FigureState, type Kit } from "./figure";
+import { close, drawFigure, makeKit, type FigureState, type Kit } from "./figure";
 
 const LIFT = 0.85; // metros de tela por metro de altura (bola, traves)
 const FIG_H = 1.9; // altura desenhada do jogador (m)
@@ -13,8 +13,10 @@ export class Camera {
     const b = m.ball;
     const owner = m.holder ? m.holder.team : m.lastTouch ? m.lastTouch.team : 0;
     const dir = owner === 0 ? -1 : 1;
-    let tx = b.x + b.vx * 0.35;
-    let ty = b.y + b.vy * 0.35 + dir * 4;
+    const look = m.mode === "decide" || m.mode === "slowmo" ? 0 : 0.35;
+    let tx = b.x + b.vx * look;
+    const deciding = m.mode === "decide" || m.mode === "slowmo";
+    let ty = b.y + b.vy * look + dir * (deciding ? 1.5 : 4);
     if (m.mode === "goal" && m.scorer) { tx = m.scorer.body.x; ty = m.scorer.body.y; }
     const hw = viewW / 2, hh = viewH / 2;
     tx = clamp(tx, Math.min(hw - 4, W / 2), Math.max(W + 4 - hw, W / 2));
@@ -44,7 +46,10 @@ export class Renderer {
 
   constructor(private ctx: CanvasRenderingContext2D, private m: Match) {
     const t = m.teams;
-    this.kits = [makeKit(t[0].c1, t[0].c2, !!t[0].stripes), makeKit(t[1].c1, t[1].c2, !!t[1].stripes)];
+    // cores parecidas: o visitante usa o segundo uniforme (ou branco)
+    let a1 = t[1].c1, a2 = t[1].c2;
+    if (close(t[0].c1, a1)) { [a1, a2] = close(t[0].c1, t[1].c2) ? ["#f2f2f2", t[1].c1] : [t[1].c2, t[1].c1]; }
+    this.kits = [makeKit(t[0].c1, t[0].c2, !!t[0].stripes), makeKit(a1, a2, !!t[1].stripes)];
     this.keeperKits = [makeKit("#e8c61c", "#2b2b2b", false), makeKit("#3fb3e8", "#1d2b44", false)];
     this.order = m.players.slice();
     this.fs = { view: 0, flip: 1, phase: 0, amp: 0, anim: "run", animT: 0, diveDir: 0, skin: 0, hair: 0, hairColor: 0, kit: this.kits[0], keeper: false };
@@ -78,15 +83,23 @@ export class Renderer {
     this.cam.follow(m, dt, c.width / (s * this.cam.zoom), c.height / (s * this.cam.zoom));
     this.netBulge = Math.max(this.netBulge - dt * 0.6, 0);
     const z = s * this.cam.zoom;
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.filter = m.desat > 0.01 ? `grayscale(${m.desat.toFixed(2)})` : "none";
     ctx.setTransform(z, 0, 0, z, c.width / 2 - this.cam.x * z, c.height / 2 - this.cam.y * z);
     this.drawPitch(z);
     this.drawGoalBack(true);
     this.drawGoalBack(false);
     this.drawPeopleAndBall();
     this.drawGoalFront();
-    ctx.filter = "none";
+    if (m.desat > 0.01) {
+      // preto e branco na decisão: uma única mistura "saturation" sobre a cena (barato no celular)
+      ctx.save();
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.globalCompositeOperation = "saturation";
+      ctx.globalAlpha = m.desat;
+      ctx.fillStyle = "#808080";
+      ctx.fillRect(0, 0, c.width, c.height);
+      ctx.restore();
+      ctx.setTransform(z, 0, 0, z, c.width / 2 - this.cam.x * z, c.height / 2 - this.cam.y * z);
+    }
     this.drawDecisionMarks();
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     this.drawHud(dpr);
@@ -316,8 +329,8 @@ export class Renderer {
     roundRect(ctx, sx, sy, sw, sh, 12 * u); ctx.fill();
     ctx.fillStyle = "#39e33f";
     ctx.fillRect(sx + 12 * u, sy + sh - 3 * u, sw - 24 * u, 2 * u);
-    ctx.fillStyle = t[0].c1; ctx.fillRect(sx + 14 * u, sy + 12 * u, 8 * u, 20 * u);
-    ctx.fillStyle = t[1].c1; ctx.fillRect(sx + sw - 22 * u, sy + 12 * u, 8 * u, 20 * u);
+    ctx.fillStyle = this.kits[0].shirt; ctx.fillRect(sx + 14 * u, sy + 12 * u, 8 * u, 20 * u);
+    ctx.fillStyle = this.kits[1].shirt; ctx.fillRect(sx + sw - 22 * u, sy + 12 * u, 8 * u, 20 * u);
     ctx.fillStyle = "#fff";
     ctx.textBaseline = "middle";
     ctx.font = `700 ${19 * u}px system-ui, sans-serif`;
@@ -336,8 +349,8 @@ export class Renderer {
     const pw = 260 * u, ph = 6 * u, px = c.width / 2 - pw / 2, py = c.height - 18 * u;
     const k = m.possession0;
     ctx.fillStyle = "rgba(0,0,0,0.45)"; roundRect(ctx, px - 4 * u, py - 4 * u, pw + 8 * u, ph + 8 * u, 6 * u); ctx.fill();
-    ctx.fillStyle = t[0].c1; ctx.fillRect(px, py, pw * k, ph);
-    ctx.fillStyle = t[1].c1; ctx.fillRect(px + pw * k, py, pw * (1 - k), ph);
+    ctx.fillStyle = this.kits[0].shirt; ctx.fillRect(px, py, pw * k, ph);
+    ctx.fillStyle = this.kits[1].shirt; ctx.fillRect(px + pw * k, py, pw * (1 - k), ph);
     // dica da decisão
     if (m.hint && m.mode === "decide") {
       ctx.font = `600 ${15 * u}px system-ui, sans-serif`;

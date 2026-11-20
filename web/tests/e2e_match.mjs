@@ -18,7 +18,7 @@ await new Promise((r) => setTimeout(r, 2500));
 const browser = await chromium.launch();
 const shot = async (page, name) => page.screenshot({ path: `${OUT}/${name}.png`, timeout: 15000 }).catch((e) => log("shot fail", name, e.message));
 const perfOf = (page) => page.evaluate(() => { const p = window.__perf; return p && p.frames ? { fps: +(1000 * p.frames / p.sumMs).toFixed(1), worstMs: +p.worstMs.toFixed(1), drawMs: +(p.drawMs / p.frames).toFixed(2) } : null; });
-const resetPerf = (page) => page.evaluate(() => { window.__perf ??= { frames: 0, sumMs: 0, worstMs: 0, drawMs: 0, reset() { this.frames = 0; this.sumMs = 0; this.worstMs = 0; this.drawMs = 0; } }; window.__perf.reset(); });
+const resetPerf = (page) => page.evaluate(() => { window.__perf = window.__perf || { frames: 0, sumMs: 0, worstMs: 0, drawMs: 0, reset() { this.frames = 0; this.sumMs = 0; this.worstMs = 0; this.drawMs = 0; } }; window.__perf.reset(); });
 const clickText = async (page, t) => { await page.getByText(t, { exact: false }).first().click({ timeout: 8000 }); await page.waitForTimeout(700); };
 
 try {
@@ -35,7 +35,8 @@ try {
     await page.close();
   }
   // 2) fluxo real no celular
-  const page = await browser.newPage({ viewport: { width: 915, height: 412 }, deviceScaleFactor: 2.625, hasTouch: true });
+  const vctx = await browser.newContext({ viewport: { width: 915, height: 412 }, deviceScaleFactor: 2, hasTouch: true, recordVideo: { dir: OUT, size: { width: 915, height: 412 } } });
+  const page = await vctx.newPage();
   const errs = []; page.on("pageerror", (e) => errs.push(String(e)));
   await page.goto("http://localhost:4182/");
   await page.waitForTimeout(4000);
@@ -56,7 +57,7 @@ try {
   await shot(page, "fluxo_3_partida");
   // adianta até uma chance do usuário e chuta arrastando
   const mode = await page.evaluate(() => { const m = window.__match; for (let i = 0; i < 60 * 300 && m.mode !== "decide" && m.mode !== "ended"; i++) m.update(1 / 60); m.update(0.4); return m.mode; });
-  await page.waitForTimeout(300);
+  await page.waitForTimeout(2000); // câmera chega na bola
   await shot(page, "fluxo_4_decisao");
   if (mode === "decide") {
     const pos = await page.evaluate(() => { const m = window.__match, r = window.__renderer; const [x, y] = r.worldToScreen(m.ball.x, m.ball.y); const up = m.holder && m.holder.team === 0 ? -1 : 1; return { x: x / devicePixelRatio, y: y / devicePixelRatio, up }; });
@@ -73,7 +74,14 @@ try {
   await page.waitForTimeout(4500);
   await shot(page, "fluxo_6_fim");
   log("tela final contém 'Fim de jogo':", await page.getByText("Fim de jogo").count(), "erros", errs);
+  const vid = await page.video().path();
   await page.close();
+  await vctx.close();
+  log("video", vid);
+  const { execSync } = await import("node:child_process");
+  // ~15 s da partida (a partir da entrada em campo)
+  execSync(`ffmpeg -v error -y -ss 11 -t 15 -i "${vid}" -c:v libx264 -pix_fmt yuv420p -crf 26 "${OUT}/partida_web.mp4"`);
+  log("mp4 ok");
 } catch (e) {
   log("FALHA", e.message);
 }
