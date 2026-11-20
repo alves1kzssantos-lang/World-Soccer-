@@ -2,7 +2,7 @@
 import { h } from "../dom";
 import type { Ctx } from "../ctx";
 import { clubCrest, kitOf, playerRow, energyCell } from "../ctx";
-import type { PackVM, PlayerVM } from "../career_api";
+import type { BoxTierVM, PlayerVM } from "../career_api";
 import { button, card, tapCard, chip, bar, tabs, toast, modal, virtualList, lineChart, barsChart, posChip } from "../widgets";
 import { header } from "../nav";
 import { compLogo } from "../assets";
@@ -34,7 +34,7 @@ export function registerClub(ctx: Ctx): void {
         h("div.col.grow", null,
           tapCard("Escalação", () => nav.go("lineup"), h("div", { style: "font:700 1.3em Display" }, `${hb.formation} • Energia ${hb.teamEnergy}%`), bar(hb.teamEnergy / 100, undefined, true)),
           h("div.row", { style: "align-items:stretch" },
-            tapCard("Loja", () => nav.go("store"), h("div", { style: "font:700 1.3em Display" }, "Packs 80+ • 90+"), h("div.small.muted", null, "Contratações especiais")),
+            tapCard("Loja", () => nav.go("store"), h("div", { style: "font:700 1.3em Display" }, "Box de contratações"), h("div.small.muted", null, `${api.packs()[0]?.spinsLeft ?? 0} giro(s) disponível(is)`)),
             tapCard("Contratos", () => nav.go("squad"), h("div", { style: "font:700 1.3em Display", class: hb.expiring ? "neg-txt" : "" }, `${hb.expiring} vencendo`), h("div.small.muted", null, `${hb.offers} propostas`))),
           tapCard("Finanças", () => nav.go("finance"), h("div", { style: "font:700 1.3em Display" }, M(hb.money)), h("div.small.muted", null, "Caixa, orçamento e folha")))),
       h("div.hub-nav", null, ([["Elenco", "squad"], ["Mercado", "market"], ["Calendário", "table", 2], ["Copas", "cups"], ["Coletiva", "press"], ["Redes", "social"]] as [string, string, number?][]).map(([t, s, a]) =>
@@ -139,36 +139,68 @@ export function registerClub(ctx: Ctx): void {
 
   nav.register("store", () => {
     const fin = api.finance();
+    const box = api.packs()[0];
     const cash = h("div.card", { style: "padding:6px 12px;font:700 1.15em Display" }, M(fin.cash));
-    const packEl = (p: PackVM) => h("div.card.pack", null,
-      h(`div.art.tier-${p.tier}`, null, h("span", { style: "position:relative" }, p.tier === "jovem" ? "★" : p.name.match(/\d+\+/)?.[0] ?? `×${p.count}`)),
-      h("div", { style: "font:700 1.1em Display" }, p.name), h("div.small.muted", null, p.desc),
-      h("div.small", null, p.odds.map(([k, v]) => `${k}: ${Math.round(Number(v) * 10) / 10}%`).join(" • ")),
-      button(M(p.price), () => openPack(p), "primary", { style: "width:100%" }));
-    const openPack = (p: PackVM) => {
-      if (fin.cash < p.price) { toast("Caixa insuficiente para este pack."); return; }
-      modal((close) => card(null, h("div.col", null, h("div", { style: "font:700 1.3em Display" }, `Abrir ${p.name}?`),
-        h("div.muted", null, `Custa ${M(p.price)} do caixa do clube. O jogador entra no elenco com contrato e salário (respeitando o teto da diretoria).`),
-        h("div.row", null, button("Cancelar", close), button("ABRIR", () => { close(); reveal(p); }, "primary", { style: "flex:1" })))));
+    if (!box) return h("div", null, header(nav, "Loja de contratações", "", cash));
+    const tierCard = (t: BoxTierVM) => h(`div.card.boxtier.bt-${t.id}`, null,
+      h("div.bt-art", { style: `--c:${t.color}` }, h("span", null, t.name.toUpperCase())),
+      h("div", { style: "font:700 1.05em Display" }, `Geral ${t.ovr[0]}–${t.ovr[1]}`),
+      h("div.big.num", { style: `color:${t.color}` }, `${t.pct}%`), h("div.small.muted", null, "de chance"));
+    const spin = () => {
+      if (box.spinsLeft <= 0) { toast(`Seu time já usou os ${box.spinsMax} giros.`); return; }
+      if (fin.cash < box.price) { toast("Caixa insuficiente para girar."); return; }
+      modal((close) => card(null, h("div.col", null, h("div", { style: "font:700 1.3em Display" }, "Girar a box?"),
+        h("div.muted", null, `Custa ${M(box.price)} do caixa do clube. O jogador sorteado entra no elenco com contrato (respeitando o teto da diretoria).`),
+        h("div.row", null, button("Cancelar", close), button("GIRAR", () => { close(); run(); }, "primary", { style: "flex:1" })))));
     };
-    const reveal = (p: PackVM) => {
-      const res = api.openPack(p.id);
+    const run = () => {
+      const res = api.openPack(box.id);
       if (!res.ok) { toast(res.msg); return; }
-      const club = api.hub().club;
-      const cards = res.players.map((pl: PlayerVM) => {
-        const c = h("div.pcard", null, h("div.in", null, h("div.b", null, h("div.neon", { style: "font:700 2.2em Display" }, "?")),
-          h(`div.f.tier-${p.tier}`, null, h("div", { style: "font:700 2.4em Display;line-height:1" }, String(pl.ovr)), posChip(pl.pos),
-            portrait(lookForPlayer(pl, kitOf(club)), 80, "bust"), h("div", { style: "font-weight:700;text-align:center" }, pl.name), h("div.small", null, `${pl.age} anos • ${pl.nat}`))));
-        return c;
-      });
-      const ov = h("div.reveal", null, h("div", { style: "font:700 1.6em Display;letter-spacing:.06em" }, p.name.toUpperCase()), h("div.row", { style: "gap:18px" }, cards),
-        button("Continuar", () => { ov.remove(); nav.refresh(); }, "primary"));
+      const won = res.tiers[0] ?? "bronze";
+      // fita de cartas: sorteio visual pelas mesmas chances; a carta da posição alvo é o prêmio real
+      const N = 44, TARGET = 38, W = 104, GAP = 10;
+      const pickVisual = (): BoxTierVM["id"] => { const r = Math.random() * 100; let acc = 0; for (const t of box.tiers) { acc += t.pct; if (r < acc) return t.id; } return "bronze"; };
+      const ids: BoxTierVM["id"][] = Array.from({ length: N }, (_, i) => (i === TARGET ? won : pickVisual()));
+      const colorOf = (id: string) => box.tiers.find((t) => t.id === id)?.color ?? "#888";
+      const nameOf = (id: string) => box.tiers.find((t) => t.id === id)?.name ?? id;
+      const strip = h("div.reel-strip", null, ids.map((id) => h(`div.reel-card.bt-${id}`, { style: `--c:${colorOf(id)}` }, h("span", null, nameOf(id).toUpperCase()))));
+      const win = h("div.reel-win", null, strip, h("div.reel-mark"));
+      const title = h("div", { style: "font:700 1.6em Display;letter-spacing:.06em" }, "GIRANDO…");
+      const slot = h("div.row", { style: "gap:18px;min-height:10px" });
+      const cont = button("Continuar", () => { ov.remove(); nav.refresh(); }, "primary", { style: "visibility:hidden" });
+      const ov = h("div.reveal", null, title, win, slot, cont);
       (document.querySelector(".ws-root") ?? document.body).appendChild(ov);
-      cards.forEach((c, i) => setTimeout(() => c.classList.add("flip"), 600 + i * 450));
-      if (res.refund) toast(`Repetido convertido em ${M(res.refund)}`);
+      const jitter = (Math.random() - 0.5) * (W * 0.6);
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        const center = win.clientWidth / 2;
+        strip.style.transform = `translateX(${center - (TARGET * (W + GAP) + W / 2) + jitter}px)`;
+      }));
+      strip.addEventListener("transitionend", () => {
+        (strip.children[TARGET] as HTMLElement).classList.add("win");
+        title.textContent = `CARTA ${nameOf(won).toUpperCase()}!`;
+        const club = api.hub().club;
+        const pl = res.players[0];
+        if (pl) {
+          const c = h("div.pcard", null, h("div.in", null, h("div.b", null, h("div.neon", { style: "font:700 2.2em Display" }, "?")),
+            h(`div.f.bt-${won}`, { style: `--c:${colorOf(won)}` }, h("div", { style: "font:700 2.4em Display;line-height:1" }, String(pl.ovr)), posChip(pl.pos),
+              portrait(lookForPlayer(pl, kitOf(club)), 80, "bust"), h("div", { style: "font-weight:700;text-align:center" }, pl.name), h("div.small", null, `${pl.age} anos • ${pl.nat}`))));
+          slot.appendChild(c);
+          setTimeout(() => c.classList.add("flip"), 500);
+        }
+        if (res.refund) toast(`Repetido: ${M(res.refund)} de volta ao caixa`);
+        setTimeout(() => { cont.style.visibility = "visible"; }, 900);
+      }, { once: true });
     };
-    return h("div", null, header(nav, "Loja de contratações", "Packs pagos com o dinheiro do clube", cash),
-      h("div.ws-body", { style: "align-items:stretch" }, api.packs().map(packEl)));
+    return h("div", null, header(nav, "Loja de contratações", "Box paga com o dinheiro do clube", cash),
+      h("div.ws-body", { style: "align-items:stretch" },
+        h("div.card.boxmain", null,
+          h("div.box-art", null, h("span", null, "BOX")),
+          h("div", { style: "font:700 1.3em Display" }, box.name), h("div.small.muted", null, box.desc),
+          h("div.row", { style: "justify-content:center;gap:6px" }, Array.from({ length: box.spinsMax }, (_, i) => h(`div.spin-dot${i < box.spinsLeft ? ".on" : ""}`))),
+          h("div.small", null, `${box.spinsLeft} de ${box.spinsMax} giros nesta temporada`),
+          button(box.spinsLeft > 0 ? `GIRAR • ${M(box.price)}` : "SEM GIROS", spin, box.spinsLeft > 0 ? "primary" : "", { style: "width:100%" })),
+        h("div.col", { style: "flex:2;gap:10px" }, h("div.small.muted", null, "CARTAS E CHANCES"),
+          h("div.row", { style: "gap:10px;align-items:stretch" }, [...box.tiers].reverse().map(tierCard)))));
   });
 
   nav.register("finance", () => {

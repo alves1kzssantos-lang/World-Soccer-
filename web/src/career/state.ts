@@ -51,4 +51,6 @@ export interface Econ {
   ledger: { d: number; k: string; t: string; v: number }[]; hist: [number, number][];
   transfer_budget: number; transfer_spent: number; wage_budget: number; board_warn: number; last_gate: number;
 }
-export interface StoreState { opened: number; spent: number; history: { day: number; pack: string; got: string[]; price: number }[] }
+export interface StoreState { opened: number; spent: number; history: { day: number; pack: string; got: string[]; price: number }[];
+  /** giros usados por time: chave = id do clube */
+  spins?: Record<string, { season: number; used: number }> }

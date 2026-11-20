@@ -22,6 +22,7 @@ export interface StoreDef {
   _sobre?: string; tiers: StoreTier[]; packs: StorePack[];
   receita_referencia: number; escala_min: number; escala_max: number;
   destaque_desconto: number; reembolso_duplicado: number; anos_contrato: number; tolerancia_teto_folha: number;
+  giros_por_time?: number; reinicia_temporada?: boolean;
 }
 
 /** Tudo que o modo carreira lê dos arquivos de dados. */

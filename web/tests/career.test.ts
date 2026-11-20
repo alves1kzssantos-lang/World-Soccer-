@@ -12,7 +12,7 @@ describe("dados", () => {
     expect(d.leagues[0].clubs.length % 2).toBe(0);
     expect(d.cups.length).toBeGreaterThan(5);
     expect(Object.keys(d.rosters).length).toBeGreaterThan(100);
-    expect(d.store.packs.length).toBeGreaterThanOrEqual(4);
+    expect(d.store.packs.map((p) => p.id)).toEqual(["box"]);
     expect(d.tuning.arbitro).toBeTruthy();
   });
   it("formata dinheiro no padrão brasileiro", () => {

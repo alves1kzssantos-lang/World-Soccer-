@@ -53,12 +53,33 @@ export class Store {
     return p.odds.map((o) => { const t = this.tier(o.tier); return { tier: t.id, nome: t.nome, ovr: t.ovr, p: o.p, pct: `${(o.p * 100).toFixed(o.p < 0.1 ? 1 : 0)}%` }; });
   }
 
+  /** Giros que o seu time ainda tem (limite por time; renova a cada temporada se configurado). */
+  spinsMax(): number { return this.def().giros_por_time ?? 3; }
+  spinsLeft(): number {
+    const st = this.ensure();
+    const rec = st.spins?.[String(this.g.S.club)];
+    if (!rec) return this.spinsMax();
+    if (this.def().reinicia_temporada && rec.season !== this.g.S.season) return this.spinsMax();
+    return Math.max(0, this.spinsMax() - rec.used);
+  }
+  private useSpin(): void {
+    const st = this.ensure();
+    if (!st.spins) st.spins = {};
+    const k = String(this.g.S.club);
+    const rec = st.spins[k];
+    if (!rec || (this.def().reinicia_temporada && rec.season !== this.g.S.season)) st.spins[k] = { season: this.g.S.season, used: 1 };
+    else rec.used++;
+  }
+
   /** "" se pode comprar; senão o motivo. */
   canBuy(id: string): string {
     const g = this.g;
     const p = this.pack(id);
     if (!p) return "Pack não encontrado.";
     if (g.pro.isPro()) return "A loja de contratações é da carreira de técnico.";
+    if (this.spinsLeft() <= 0) return this.def().reinicia_temporada
+      ? `Seu time já usou os ${this.spinsMax()} giros desta temporada. Novos giros na próxima temporada.`
+      : "Seu time já usou todos os giros.";
     const price = this.price(id);
     if (price > g.S.money + 0.001) return `Caixa insuficiente: o pack custa ${g.money(price)}.`;
     if (g.squad(g.S.club).length + p.cartas > 30) return `Elenco cheio: abra espaço para ${p.cartas} jogador(es) (máximo 30).`;
@@ -107,6 +128,7 @@ export class Store {
     const st = this.ensure();
     const me = g.S.club;
     g.finance.book("loja", `Loja: ${p.nome}`, -price);
+    this.useSpin();
     g.finance.onPurchase(price, 0);
     const cards: StoreCard[] = [];
     const yearsPassed = g.S.season - 1;
